@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import OrdersManagement from './OrdersManagement';
+import MenuManagement from './MenuManagement';
 import './AdminDashboard.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://rauma.onrender.com/api';
+// URL backend mặc định khi chạy local
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 function AdminDashboard() {
   const [, setOrders] = useState([]);
@@ -14,6 +16,7 @@ function AdminDashboard() {
     completedOrders: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'menu'
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -125,9 +128,30 @@ function AdminDashboard() {
       </div>
 
       <div className="admin-content">
-        <OrdersManagement onOrderUpdate={() => {
-          fetchOrders();
-        }} />
+        <div className="admin-tabs">
+          <button
+            className={`admin-tab ${activeTab === 'orders' ? 'active' : ''}`}
+            onClick={() => setActiveTab('orders')}
+          >
+            📋 Đơn hàng
+          </button>
+          <button
+            className={`admin-tab ${activeTab === 'menu' ? 'active' : ''}`}
+            onClick={() => setActiveTab('menu')}
+          >
+            🍽 Thực đơn
+          </button>
+        </div>
+
+        {activeTab === 'orders' ? (
+          <OrdersManagement
+            onOrderUpdate={() => {
+              fetchOrders();
+            }}
+          />
+        ) : (
+          <MenuManagement />
+        )}
       </div>
     </div>
   );

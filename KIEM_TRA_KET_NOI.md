@@ -6,20 +6,20 @@
 2. ✅ **Error handling**: Thêm xử lý lỗi tốt hơn ở frontend với thông báo rõ ràng
 3. ✅ **API connection**: Đảm bảo frontend có thể kết nối với backend qua proxy
 
-## Cách kiểm tra:
+## Cách kiểm tra (khi chạy trên máy local):
 
 ### 1. Kiểm tra Backend (Port 5000)
 
-Mở trình duyệt hoặc terminal và kiểm tra:
+Mở trình duyệt hoặc terminal và kiểm tra (backend local):
 ```
-https://rauma.onrender.com/api/menu
+http://localhost:5000/api/menu
 ```
 
 Nếu backend chạy đúng, bạn sẽ thấy JSON response với danh sách menu items.
 
-Hoặc dùng PowerShell:
+Hoặc dùng PowerShell (kiểm tra backend local):
 ```powershell
-Invoke-WebRequest -Uri "https://rauma.onrender.com/api/menu" | Select-Object -ExpandProperty Content
+Invoke-WebRequest -Uri "http://localhost:5000/api/menu" | Select-Object -ExpandProperty Content
 ```
 
 ### 2. Kiểm tra Frontend (Port 3000)
@@ -30,6 +30,11 @@ http://localhost:3000
 ```
 
 Nếu frontend không kết nối được với backend, bạn sẽ thấy thông báo lỗi với nút "Thử lại".
+
+Frontend đang gọi API theo nguyên tắc:
+
+- Mặc định (local): `http://localhost:5000/api/...`
+- Khi deploy: dùng biến môi trường `REACT_APP_API_URL` để trỏ đến URL backend (vd: `https://rauma.onrender.com/api`)
 
 ### 3. Kiểm tra các process đang chạy
 

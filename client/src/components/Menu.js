@@ -12,6 +12,15 @@ function Menu({ title, items, onAddToCart }) {
       <div className="menu-grid">
         {items.map((item) => (
           <div key={item.id} className="menu-item">
+            {item.image_url && (
+              <div className="menu-item-image-wrapper">
+                <img
+                  src={item.image_url}
+                  alt={item.name}
+                  className="menu-item-image"
+                />
+              </div>
+            )}
             <div className="menu-item-content">
               <h3 className="menu-item-name">{item.name}</h3>
               {item.description && (

@@ -2,6 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
+let multer;
+try {
+  // Multer dùng để upload file ảnh. Nếu chưa cài, backend vẫn chạy được (chỉ không dùng được API upload).
+  multer = require('multer');
+} catch (e) {
+  console.warn('Multer chưa được cài, API /api/upload sẽ bị tắt. Bỏ qua cảnh báo này nếu bạn không dùng upload ảnh.');
+}
 const { initDatabase, seedDatabase } = require('./database');
 
 const app = express();
@@ -10,6 +18,33 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// Static serving for uploads
+app.use('/uploads', express.static(uploadsDir));
+
+let upload;
+if (multer) {
+  // Multer storage config
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, uploadsDir);
+    },
+    filename: function (req, file, cb) {
+      const ext = path.extname(file.originalname);
+      const base = path.basename(file.originalname, ext).replace(/\s+/g, '-');
+      const uniqueSuffix = Date.now();
+      cb(null, `${base}-${uniqueSuffix}${ext}`);
+    },
+  });
+
+  upload = multer({ storage });
+}
 
 // Database setup
 const dbPath = path.join(__dirname, 'database.sqlite');
@@ -32,6 +67,26 @@ const db = new sqlite3.Database(dbPath, (err) => {
 });
 
 // API Routes
+
+// Upload image
+if (upload) {
+  app.post('/api/upload', upload.single('image'), (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // URL for frontend to use
+    const imageUrl = `/uploads/${req.file.filename}`;
+    res.json({ image_url: imageUrl });
+  });
+} else {
+  // Nếu chưa cài multer, trả về lỗi rõ ràng để frontend hiểu
+  app.post('/api/upload', (req, res) => {
+    res.status(500).json({
+      error: 'Multer is not installed on server. Image upload is disabled.',
+    });
+  });
+}
 
 // Get all menu items
 app.get('/api/menu', (req, res) => {
@@ -65,6 +120,82 @@ app.get('/api/menu/:id', (req, res) => {
       return res.status(404).json({ error: 'Menu item not found' });
     }
     res.json(row);
+  });
+});
+
+// Create new menu item
+app.post('/api/menu', (req, res) => {
+  const { name, category, price, description, image_url } = req.body;
+
+  if (!name || !category || !price) {
+    return res.status(400).json({ error: 'Thiếu tên, danh mục hoặc giá' });
+  }
+
+  const stmt = db.prepare(
+    'INSERT INTO menu_items (name, category, price, description, image_url) VALUES (?, ?, ?, ?, ?)'
+  );
+
+  stmt.run(
+    name,
+    category,
+    price,
+    description || null,
+    image_url || null,
+    function (err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      db.get('SELECT * FROM menu_items WHERE id = ?', [this.lastID], (err2, row) => {
+        if (err2) {
+          return res.status(500).json({ error: err2.message });
+        }
+        res.status(201).json(row);
+      });
+    }
+  );
+});
+
+// Update menu item
+app.put('/api/menu/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, category, price, description, image_url } = req.body;
+
+  if (!name || !category || !price) {
+    return res.status(400).json({ error: 'Thiếu tên, danh mục hoặc giá' });
+  }
+
+  db.run(
+    'UPDATE menu_items SET name = ?, category = ?, price = ?, description = ?, image_url = ? WHERE id = ?',
+    [name, category, price, description || null, image_url || null, id],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Menu item not found' });
+      }
+      db.get('SELECT * FROM menu_items WHERE id = ?', [id], (err2, row) => {
+        if (err2) {
+          return res.status(500).json({ error: err2.message });
+        }
+        res.json(row);
+      });
+    }
+  );
+});
+
+// Delete menu item
+app.delete('/api/menu/:id', (req, res) => {
+  const { id } = req.params;
+
+  db.run('DELETE FROM menu_items WHERE id = ?', [id], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Menu item not found' });
+    }
+    res.json({ message: 'Xóa món thành công' });
   });
 });
 
