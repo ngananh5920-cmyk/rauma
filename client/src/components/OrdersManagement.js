@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './OrdersManagement.css';
 
-const API_URL = process.env.REACT_APP_API_URL || '/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://rauma.onrender.com/api';
 
 function OrdersManagement({ onOrderUpdate }) {
   const [orders, setOrders] = useState([]);

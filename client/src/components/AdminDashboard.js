@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import OrdersManagement from './OrdersManagement';
 import './AdminDashboard.css';
 
-const API_URL = process.env.REACT_APP_API_URL || '/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://rauma.onrender.com/api';
 
 function AdminDashboard() {
   const [, setOrders] = useState([]);

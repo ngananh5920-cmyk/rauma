@@ -79,7 +79,7 @@ npm run client
 ### 3. Truy cập ứng dụng
 
 - Frontend: http://localhost:3000
-- Backend API: http://localhost:5000/api
+- Backend API: https://rauma.onrender.com/api
 
 ## API Endpoints
 

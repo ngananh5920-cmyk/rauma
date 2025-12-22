@@ -12,14 +12,14 @@
 
 Mở trình duyệt hoặc terminal và kiểm tra:
 ```
-http://localhost:5000/api/menu
+https://rauma.onrender.com/api/menu
 ```
 
 Nếu backend chạy đúng, bạn sẽ thấy JSON response với danh sách menu items.
 
 Hoặc dùng PowerShell:
 ```powershell
-Invoke-WebRequest -Uri "http://localhost:5000/api/menu" | Select-Object -ExpandProperty Content
+Invoke-WebRequest -Uri "https://rauma.onrender.com/api/menu" | Select-Object -ExpandProperty Content
 ```
 
 ### 2. Kiểm tra Frontend (Port 3000)

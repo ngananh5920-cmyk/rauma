@@ -4,7 +4,7 @@ import Menu from './Menu';
 import Cart from './Cart';
 import OrderForm from './OrderForm';
 
-const API_URL = process.env.REACT_APP_API_URL || '/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://rauma.onrender.com/api';
 
 function HomePage() {
   const [menuItems, setMenuItems] = useState([]);
@@ -130,7 +130,7 @@ function HomePage() {
             <div className="error-message">
               <h2>⚠️ Lỗi kết nối</h2>
               <p>{error}</p>
-              <p>Vui lòng đảm bảo backend đang chạy tại <strong>http://localhost:5000</strong></p>
+              <p>Vui lòng đảm bảo backend đang chạy tại <strong>https://rauma.onrender.com</strong></p>
               <button onClick={fetchMenuItems} className="retry-btn">Thử lại</button>
             </div>
           ) : (
