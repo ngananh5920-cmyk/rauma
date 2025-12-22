@@ -6,7 +6,7 @@ import './AdminDashboard.css';
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
 function AdminDashboard() {
-  const [orders, setOrders] = useState([]);
+  const [, setOrders] = useState([]);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
