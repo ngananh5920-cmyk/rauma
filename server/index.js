@@ -325,21 +325,30 @@ app.put('/api/orders/:id', async (req, res) => {
 
 // Delete order
 app.delete('/api/orders/:id', async (req, res) => {
-  const { id } = req.params;
-  console.log(`DELETE /api/orders/${id} - Attempting to delete order`);
-  
-  db.run('DELETE FROM orders WHERE id = ?', [id], function(err) {
-    if (err) {
-      console.error(`Error deleting order ${id}:`, err);
-      return res.status(500).json({ error: err.message });
+  try {
+    const { id } = req.params;
+    console.log(`DELETE /api/orders/${id} - Attempting to delete order`);
+    
+    if (!id || isNaN(parseInt(id))) {
+      return res.status(400).json({ error: 'Invalid order ID' });
     }
-    if (this.changes === 0) {
-      console.log(`Order ${id} not found`);
-      return res.status(404).json({ error: 'Order not found' });
-    }
-    console.log(`Order ${id} deleted successfully`);
-    res.json({ message: 'Order deleted successfully' });
-  });
+    
+    db.run('DELETE FROM orders WHERE id = ?', [id], function(err) {
+      if (err) {
+        console.error(`Error deleting order ${id}:`, err);
+        return res.status(500).json({ error: err.message });
+      }
+      if (this.changes === 0) {
+        console.log(`Order ${id} not found`);
+        return res.status(404).json({ error: 'Order not found' });
+      }
+      console.log(`Order ${id} deleted successfully`);
+      res.json({ message: 'Order deleted successfully', deletedId: id });
+    });
+  } catch (error) {
+    console.error('Unexpected error in DELETE /api/orders/:id:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // Serve static files from React app in production
