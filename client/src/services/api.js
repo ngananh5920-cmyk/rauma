@@ -56,12 +56,18 @@ export const getImageUrl = (imageUrl) => {
 // Helper function để thực hiện fetch với error handling
 const fetchAPI = async (endpoint, options = {}) => {
   try {
+    // DELETE request không cần body và có thể không cần Content-Type
+    const isDelete = options.method === 'DELETE';
+    const headers = { ...options.headers };
+    
+    // Chỉ thêm Content-Type nếu có body hoặc không phải DELETE
+    if (!isDelete && (options.body || !options.method || options.method === 'POST' || options.method === 'PUT' || options.method === 'PATCH')) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
     });
 
     if (!response.ok) {
@@ -69,7 +75,18 @@ const fetchAPI = async (endpoint, options = {}) => {
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    // DELETE có thể không có response body
+    if (isDelete && response.status === 204) {
+      return { message: 'Deleted successfully' };
+    }
+
+    // Kiểm tra xem response có body không
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return await response.json();
+    }
+    
+    return { message: 'Success' };
   } catch (error) {
     console.error(`API Error (${endpoint}):`, error);
     throw error;
