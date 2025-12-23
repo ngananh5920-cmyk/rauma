@@ -5,7 +5,9 @@ function OrderForm({ cart, totalPrice, onSubmit, onCancel }) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [deliveryTime, setDeliveryTime] = useState('');
   const [errors, setErrors] = useState({});
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN').format(price);
@@ -24,6 +26,9 @@ function OrderForm({ cart, totalPrice, onSubmit, onCancel }) {
     if (!address.trim()) {
       newErrors.address = 'Vui lòng nhập địa chỉ giao hàng';
     }
+    if (!deliveryTime.trim()) {
+      newErrors.deliveryTime = 'Vui lòng chọn thời gian giao hàng';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -31,18 +36,80 @@ function OrderForm({ cart, totalPrice, onSubmit, onCancel }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validate()) {
-      onSubmit({ 
-        name: name.trim(), 
-        phone: phone.trim(),
-        delivery_address: address.trim()
-      });
+      setShowConfirmDialog(true);
     }
   };
 
+  const handleConfirmOrder = () => {
+    onSubmit({ 
+      name: name.trim(), 
+      phone: phone.trim(),
+      delivery_address: address.trim(),
+      delivery_time: deliveryTime.trim()
+    });
+    setShowConfirmDialog(false);
+  };
+
+  const handleCancelConfirm = () => {
+    setShowConfirmDialog(false);
+  };
+
   return (
-    <div className="order-form-overlay" onClick={onCancel}>
-      <div className="order-form-modal" onClick={(e) => e.stopPropagation()}>
-        <h2>Xác nhận đặt hàng</h2>
+    <>
+      {showConfirmDialog && (
+        <div className="confirm-dialog-overlay">
+          <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-dialog-icon">🌿</div>
+            <h3>Xác nhận đặt hàng</h3>
+            <p>Bạn có chắc chắn muốn đặt hàng không?</p>
+            
+            <div className="confirm-order-items">
+              <h4 className="confirm-items-title">Danh sách món đã chọn:</h4>
+              <div className="confirm-items-list">
+                {cart && cart.length > 0 ? (
+                  cart.map((item) => (
+                    <div key={`confirm-${item.id}-${item.name}`} className="confirm-item-row">
+                      <span className="confirm-item-name">{item.name}</span>
+                      <span className="confirm-item-quantity">x{item.quantity}</span>
+                      <span className="confirm-item-price">{formatPrice(item.price * item.quantity)}đ</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="confirm-empty-message">Không có món nào</div>
+                )}
+              </div>
+              <div className="confirm-total-section">
+                <p className="confirm-total">Tổng tiền: <strong>{formatPrice(totalPrice)}đ</strong></p>
+              </div>
+            </div>
+
+            {deliveryTime && (
+              <div className="confirm-delivery-time">
+                <p className="confirm-delivery-label">Thời gian giao hàng:</p>
+                <p className="confirm-delivery-value">{deliveryTime}</p>
+              </div>
+            )}
+
+            <div className="confirm-dialog-actions">
+              <button 
+                className="confirm-btn-cancel" 
+                onClick={handleCancelConfirm}
+              >
+                Không
+              </button>
+              <button 
+                className="confirm-btn-ok" 
+                onClick={handleConfirmOrder}
+              >
+                Có, đặt hàng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="order-form-overlay" onClick={onCancel}>
+        <div className="order-form-modal" onClick={(e) => e.stopPropagation()}>
+          <h2>Xác nhận đặt hàng</h2>
         <div className="order-summary">
           <h3 className="order-items-title">Danh sách món đã chọn:</h3>
           <div className="order-items-list">
@@ -103,6 +170,26 @@ function OrderForm({ cart, totalPrice, onSubmit, onCancel }) {
               <span className="error-message">{errors.address}</span>
             )}
           </div>
+          <div className="form-group">
+            <label htmlFor="deliveryTime">Thời gian muốn giao hàng *</label>
+            <select
+              id="deliveryTime"
+              value={deliveryTime}
+              onChange={(e) => setDeliveryTime(e.target.value)}
+              className={errors.deliveryTime ? 'error' : ''}
+            >
+              <option value="">-- Chọn thời gian --</option>
+              <option value="Ngay lập tức">Ngay lập tức</option>
+              <option value="30 phút">30 phút</option>
+              <option value="1 giờ">1 giờ</option>
+              <option value="1.5 giờ">1.5 giờ</option>
+              <option value="2 giờ">2 giờ</option>
+              <option value="3 giờ">3 giờ</option>
+            </select>
+            {errors.deliveryTime && (
+              <span className="error-message">{errors.deliveryTime}</span>
+            )}
+          </div>
           <div className="form-actions">
             <button type="button" className="cancel-btn" onClick={onCancel}>
               Hủy
@@ -114,6 +201,7 @@ function OrderForm({ cart, totalPrice, onSubmit, onCancel }) {
         </form>
       </div>
     </div>
+    </>
   );
 }
 

@@ -1,14 +1,26 @@
 .cart {
-  background: rgba(255, 255, 255, 0.98);
-  border-radius: 24px;
+  background: #ffffff;
+  border-radius: 12px;
   padding: 2.5rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.1);
+  border: 2px solid #e8f5e9;
   max-height: calc(100vh - 200px);
   display: flex;
   flex-direction: column;
   animation: fadeInRight 0.6s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.cart::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4CAF50 0%, #66BB6A 100%);
+  border-radius: 12px 12px 0 0;
 }
 
 @keyframes fadeInRight {
@@ -20,6 +32,11 @@
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(5deg); }
 }
 
 @media (max-width: 968px) {
@@ -38,26 +55,22 @@
 }
 
 .cart-title {
-  color: #1a1a1a;
+  color: #2e7d32;
   font-size: 2rem;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 3px solid;
-  border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
+  border-bottom: 3px solid #4CAF50;
   font-weight: 700;
   letter-spacing: -0.02em;
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.cart-title::after {
-  content: '';
-  position: absolute;
-  bottom: -3px;
-  left: 0;
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 2px;
+.cart-title::before {
+  content: '🛒';
+  font-size: 1.8rem;
 }
 
 .cart-empty {
@@ -79,8 +92,10 @@
 .cart-items {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   margin-bottom: 1.5rem;
   padding-right: 0.5rem;
+  overscroll-behavior: contain;
 }
 
 .cart-items::-webkit-scrollbar {
@@ -142,22 +157,35 @@
   background: white;
   border: 2px solid #66BB6A;
   color: #66BB6A;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   border-radius: 8px;
   font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.1s ease, background 0.1s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
 }
 
-.quantity-btn:hover {
-  background: #66BB6A;
+@media (hover: hover) and (pointer: fine) {
+  .quantity-btn:hover {
+    background: #66BB6A;
+    color: white;
+    transform: scale(1.05);
+  }
+}
+
+.quantity-btn:active {
+  transform: scale(0.95);
+  background: #4CAF50;
   color: white;
-  transform: scale(1.1);
 }
 
 .quantity {
@@ -173,13 +201,27 @@
   border: none;
   font-size: 1.2rem;
   cursor: pointer;
-  padding: 0.3rem;
+  padding: 0.5rem;
+  min-width: 36px;
+  min-height: 36px;
   margin-left: auto;
-  transition: transform 0.2s ease;
+  transition: transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.remove-btn:hover {
-  transform: scale(1.2);
+@media (hover: hover) and (pointer: fine) {
+  .remove-btn:hover {
+    transform: scale(1.1);
+  }
+}
+
+.remove-btn:active {
+  transform: scale(0.9);
 }
 
 .cart-item-total {
@@ -202,23 +244,22 @@
   align-items: center;
   margin-bottom: 1.5rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
+  background: #4CAF50;
+  border-radius: 8px;
   color: white;
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
   position: relative;
   overflow: hidden;
+  border: 2px solid #45a049;
 }
 
 .cart-total::before {
-  content: '';
+  content: '🌿';
   position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-  animation: shimmer 3s infinite;
+  right: 1rem;
+  font-size: 2rem;
+  opacity: 0.2;
+  animation: float 3s ease-in-out infinite;
 }
 
 .total-label {
@@ -233,22 +274,36 @@
 
 .checkout-btn {
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #4CAF50;
   color: white;
   border: none;
   padding: 1.2rem 2rem;
-  border-radius: 16px;
+  border-radius: 8px;
   font-size: 1.2rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
   letter-spacing: 0.02em;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  will-change: transform;
 }
 
 .checkout-btn::before {
+  content: '🌿';
+  font-size: 1.3rem;
+  transition: transform 0.3s ease;
+}
+
+.checkout-btn::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -258,17 +313,30 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.3);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  transition: width 0.4s, height 0.4s;
+  pointer-events: none;
 }
 
-.checkout-btn:hover::before {
-  width: 400px;
-  height: 400px;
+@media (hover: hover) and (pointer: fine) {
+  .checkout-btn:hover::after {
+    width: 400px;
+    height: 400px;
+  }
+
+  .checkout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    background: #45a049;
+  }
+
+  .checkout-btn:hover::before {
+    transform: rotate(15deg) scale(1.2);
+  }
 }
 
-.checkout-btn:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+.checkout-btn:active {
+  transform: scale(0.95);
+  background: #45a049;
 }
 
 .checkout-btn:active {

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './OrdersManagement.css';
 import { ordersAPI } from '../services/api';
+import { useNotification } from '../hooks/useNotification';
+import Notification from './Notification';
 
 function OrdersManagement({ onOrderUpdate }) {
+  const { notification, showNotification, hideNotification } = useNotification();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -41,7 +44,7 @@ function OrdersManagement({ onOrderUpdate }) {
       }
     } catch (error) {
       console.error('Error updating order status:', error);
-      alert('Có lỗi xảy ra khi cập nhật trạng thái');
+      showNotification('Có lỗi xảy ra khi cập nhật trạng thái', 'error');
     }
   };
 
@@ -249,6 +252,15 @@ function OrdersManagement({ onOrderUpdate }) {
           </div>
         )}
       </div>
+
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          duration={notification.duration}
+          onClose={hideNotification}
+        />
+      )}
     </div>
   );
 }

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './OrdersManagement.css';
 import { menuAPI, uploadAPI, getImageUrl } from '../services/api';
+import { useNotification } from '../hooks/useNotification';
+import Notification from './Notification';
 
 function MenuManagement() {
+  const { notification, showNotification, hideNotification } = useNotification();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -74,7 +77,7 @@ function MenuManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.category || !form.price) {
-      alert('Vui lòng nhập tên, danh mục và giá');
+      showNotification('Vui lòng nhập tên, danh mục và giá', 'error');
       return;
     }
 
@@ -87,7 +90,7 @@ function MenuManagement() {
         imageUrlToUse = uploadData.image_url || imageUrlToUse;
       } catch (err) {
         console.error('Error uploading image:', err);
-        alert('Có lỗi xảy ra khi upload ảnh. Vui lòng thử lại.');
+        showNotification('Có lỗi xảy ra khi upload ảnh. Vui lòng thử lại.', 'error');
         return;
       }
     }
@@ -111,7 +114,7 @@ function MenuManagement() {
       resetForm();
     } catch (err) {
       console.error('Error saving menu item:', err);
-      alert('Có lỗi xảy ra khi lưu món');
+      showNotification('Có lỗi xảy ra khi lưu món', 'error');
     }
   };
 
@@ -125,7 +128,7 @@ function MenuManagement() {
       }
     } catch (err) {
       console.error('Error deleting menu item:', err);
-      alert('Có lỗi xảy ra khi xóa món');
+      showNotification('Có lỗi xảy ra khi xóa món', 'error');
     }
   };
 
@@ -295,6 +298,15 @@ function MenuManagement() {
           </form>
         </div>
       </div>
+
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          duration={notification.duration}
+          onClose={hideNotification}
+        />
+      )}
     </div>
   );
 }

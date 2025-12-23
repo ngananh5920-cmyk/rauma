@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import Menu from './Menu';
 import Cart from './Cart';
 import OrderForm from './OrderForm';
+import Notification from './Notification';
 import { menuAPI, ordersAPI } from '../services/api';
+import { useNotification } from '../hooks/useNotification';
 
 function HomePage() {
   const [menuItems, setMenuItems] = useState([]);
@@ -11,6 +13,7 @@ function HomePage() {
   const [showOrderForm, setShowOrderForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { notification, showNotification, hideNotification } = useNotification();
 
   useEffect(() => {
     fetchMenuItems();
@@ -80,16 +83,17 @@ function HomePage() {
       customer_name: customerInfo.name,
       customer_phone: customerInfo.phone,
       delivery_address: customerInfo.delivery_address,
+      delivery_time: customerInfo.delivery_time,
     };
 
     try {
       await ordersAPI.create(orderData);
-      alert('Đặt hàng thành công!');
+      showNotification('Đặt hàng thành công!', 'success');
       setCart([]);
       setShowOrderForm(false);
     } catch (error) {
       console.error('Error placing order:', error);
-      alert('Có lỗi xảy ra khi đặt hàng');
+      showNotification('Có lỗi xảy ra khi đặt hàng', 'error');
     }
   };
 
@@ -99,7 +103,7 @@ function HomePage() {
   return (
     <div className="App">
       <header className="app-header">
-        <h1>🍜 Câu Lạc Bộ Sinh Viên Thanh Hóa</h1>
+        <h1>🍜 Câu Lạc Bộ Sinh Viên Thanh Hóa Đại học Phenikaa</h1>
         <p>Đặt món online</p>
         <Link to="/admin" className="admin-link">🔐 Quản trị viên</Link>
       </header>
@@ -114,7 +118,7 @@ function HomePage() {
               <p>{error}</p>
               <p>
                 Vui lòng đảm bảo backend đang chạy tại{' '}
-                <strong>https://rauma.onrender.com</strong> (khi chạy trên máy)
+                <strong>https://rauma.onrender.com</strong>
               </p>
               <button onClick={fetchMenuItems} className="retry-btn">Thử lại</button>
             </div>
@@ -151,6 +155,15 @@ function HomePage() {
           totalPrice={getTotalPrice()}
           onSubmit={handleOrderSubmit}
           onCancel={() => setShowOrderForm(false)}
+        />
+      )}
+
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          duration={notification.duration}
+          onClose={hideNotification}
         />
       )}
     </div>

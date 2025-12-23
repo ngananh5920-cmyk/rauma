@@ -1,0 +1,278 @@
+.welcome-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(76, 175, 80, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(102, 187, 106, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.welcome-content {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 4rem 3rem;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(76, 175, 80, 0.2);
+  border: 2px solid #4CAF50;
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.8s ease;
+}
+
+.welcome-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4CAF50 0%, #66BB6A 100%);
+  border-radius: 20px 20px 0 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-icon {
+  font-size: 5rem;
+  margin-bottom: 1.5rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(5deg);
+  }
+}
+
+.welcome-title {
+  color: #2e7d32;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.welcome-message {
+  color: #555;
+  font-size: 1.2rem;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.welcome-message strong {
+  color: #2e7d32;
+  font-weight: 700;
+}
+
+.welcome-subtitle {
+  color: #777;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+}
+
+.continue-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 1.2rem 3rem;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  will-change: transform;
+  min-height: 48px;
+}
+
+.continue-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s, height 0.4s;
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .continue-btn:hover::before {
+    width: 400px;
+    height: 400px;
+  }
+
+  .continue-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+    background: #45a049;
+  }
+}
+
+.continue-btn:active {
+  transform: scale(0.95);
+  background: #45a049;
+}
+
+.btn-icon {
+  font-size: 1.3rem;
+  transition: transform 0.3s ease;
+}
+
+.continue-btn:hover .btn-icon {
+  transform: rotate(15deg) scale(1.2);
+}
+
+.welcome-decoration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.decoration-leaf {
+  position: absolute;
+  font-size: 3rem;
+  opacity: 0.15;
+  animation: float 4s ease-in-out infinite;
+}
+
+.decoration-leaf-1 {
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.decoration-leaf-2 {
+  top: 20%;
+  right: 15%;
+  animation-delay: 1s;
+}
+
+.decoration-leaf-3 {
+  bottom: 20%;
+  left: 15%;
+  animation-delay: 2s;
+}
+
+.decoration-leaf-4 {
+  bottom: 15%;
+  right: 10%;
+  animation-delay: 1.5s;
+}
+
+@media (max-width: 768px) {
+  .welcome-content {
+    padding: 3rem 2rem;
+    border-radius: 16px;
+  }
+
+  .welcome-icon {
+    font-size: 4rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .welcome-title {
+    font-size: 2rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .welcome-message {
+    font-size: 1.1rem;
+  }
+
+  .welcome-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+  }
+
+  .continue-btn {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-page {
+    padding: 1rem;
+  }
+
+  .welcome-content {
+    padding: 2.5rem 1.5rem;
+    border-radius: 12px;
+  }
+
+  .welcome-icon {
+    font-size: 3.5rem;
+  }
+
+  .welcome-title {
+    font-size: 1.8rem;
+  }
+
+  .welcome-message {
+    font-size: 1rem;
+  }
+
+  .welcome-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .continue-btn {
+    padding: 0.9rem 2rem;
+    font-size: 1rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .decoration-leaf {
+    font-size: 2rem;
+  }
+}
+

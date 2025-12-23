@@ -9,7 +9,7 @@ function Cart({ cart, onRemove, onUpdateQuantity, totalPrice, onCheckout }) {
   if (cart.length === 0) {
     return (
       <div className="cart">
-        <h2 className="cart-title">🛒 Giỏ hàng</h2>
+        <h2 className="cart-title">Giỏ hàng</h2>
         <div className="cart-empty">
           <p>Giỏ hàng trống</p>
           <span>Thêm món vào giỏ để bắt đầu đặt hàng</span>
@@ -20,7 +20,7 @@ function Cart({ cart, onRemove, onUpdateQuantity, totalPrice, onCheckout }) {
 
   return (
     <div className="cart">
-      <h2 className="cart-title">🛒 Giỏ hàng ({cart.length})</h2>
+      <h2 className="cart-title">Giỏ hàng ({cart.length})</h2>
       <div className="cart-items">
         {cart.map((item) => (
           <div key={item.id} className="cart-item">
@@ -62,7 +62,7 @@ function Cart({ cart, onRemove, onUpdateQuantity, totalPrice, onCheckout }) {
           <span className="total-amount">{formatPrice(totalPrice)}đ</span>
         </div>
         <button className="checkout-btn" onClick={onCheckout}>
-          Đặt hàng
+          Đặt hàng ngay
         </button>
       </div>
     </div>

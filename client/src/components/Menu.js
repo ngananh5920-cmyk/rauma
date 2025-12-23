@@ -19,6 +19,8 @@ function Menu({ title, items, onAddToCart }) {
                   src={getImageUrl(item.image_url)}
                   alt={item.name}
                   className="menu-item-image"
+                  loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     e.target.style.display = 'none';
                   }}
@@ -38,7 +40,7 @@ function Menu({ title, items, onAddToCart }) {
                   className="add-to-cart-btn"
                   onClick={() => onAddToCart(item)}
                 >
-                  ➕ Thêm vào giỏ
+                  Thêm vào giỏ
                 </button>
               </div>
             </div>
