@@ -98,10 +98,16 @@ function OrdersManagement({ onOrderUpdate }) {
   };
 
   const handleDeleteOrder = () => {
-    if (!selectedOrder) return;
+    if (!selectedOrder) {
+      console.error('No order selected for deletion');
+      return;
+    }
+    console.log('Attempting to delete order:', selectedOrder.id);
     setPendingAction(() => async () => {
       try {
-        await ordersAPI.delete(selectedOrder.id);
+        console.log('Calling ordersAPI.delete for order:', selectedOrder.id);
+        const result = await ordersAPI.delete(selectedOrder.id);
+        console.log('Delete result:', result);
         await fetchOrders();
         setSelectedOrder(null);
         showNotification('Xóa đơn hàng thành công', 'success');
@@ -110,7 +116,8 @@ function OrdersManagement({ onOrderUpdate }) {
         }
       } catch (error) {
         console.error('Error deleting order:', error);
-        showNotification('Có lỗi xảy ra khi xóa đơn hàng', 'error');
+        const errorMessage = error.message || 'Có lỗi xảy ra khi xóa đơn hàng';
+        showNotification(errorMessage, 'error');
       }
     });
     setShowPasswordModal(true);

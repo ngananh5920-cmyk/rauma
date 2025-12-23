@@ -326,14 +326,18 @@ app.put('/api/orders/:id', async (req, res) => {
 // Delete order
 app.delete('/api/orders/:id', async (req, res) => {
   const { id } = req.params;
+  console.log(`DELETE /api/orders/${id} - Attempting to delete order`);
   
   db.run('DELETE FROM orders WHERE id = ?', [id], function(err) {
     if (err) {
+      console.error(`Error deleting order ${id}:`, err);
       return res.status(500).json({ error: err.message });
     }
     if (this.changes === 0) {
+      console.log(`Order ${id} not found`);
       return res.status(404).json({ error: 'Order not found' });
     }
+    console.log(`Order ${id} deleted successfully`);
     res.json({ message: 'Order deleted successfully' });
   });
 });

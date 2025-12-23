@@ -172,9 +172,16 @@ export const ordersAPI = {
 
   // Xóa order
   delete: async (id) => {
-    return fetchAPI(`/orders/${id}`, {
-      method: 'DELETE',
-    });
+    try {
+      const result = await fetchAPI(`/orders/${id}`, {
+        method: 'DELETE',
+      });
+      console.log('Delete order success:', result);
+      return result;
+    } catch (error) {
+      console.error('Delete order error:', error);
+      throw error;
+    }
   },
 };
 
