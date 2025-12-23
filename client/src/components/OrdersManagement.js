@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './OrdersManagement.css';
-
-// URL backend mặc định khi chạy local
-const API_URL = process.env.REACT_APP_API_URL || 'https://rauma.onrender.com/api';
+import { ordersAPI } from '../services/api';
 
 function OrdersManagement({ onOrderUpdate }) {
   const [orders, setOrders] = useState([]);
@@ -20,11 +18,7 @@ function OrdersManagement({ onOrderUpdate }) {
   const fetchOrders = async () => {
     try {
       setError(null);
-      const response = await fetch(`${API_URL}/orders`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+      const data = await ordersAPI.getAll();
       setOrders(data);
       setLoading(false);
     } catch (error) {
@@ -36,25 +30,14 @@ function OrdersManagement({ onOrderUpdate }) {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (response.ok) {
-        await fetchOrders(); // Refresh orders
-        if (selectedOrder && selectedOrder.id === orderId) {
-          setSelectedOrder({ ...selectedOrder, status: newStatus });
-        }
-        // Notify parent component to update stats
-        if (onOrderUpdate) {
-          onOrderUpdate();
-        }
-      } else {
-        alert('Có lỗi xảy ra khi cập nhật trạng thái');
+      await ordersAPI.updateStatus(orderId, newStatus);
+      await fetchOrders(); // Refresh orders
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder({ ...selectedOrder, status: newStatus });
+      }
+      // Notify parent component to update stats
+      if (onOrderUpdate) {
+        onOrderUpdate();
       }
     } catch (error) {
       console.error('Error updating order status:', error);

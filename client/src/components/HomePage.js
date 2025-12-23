@@ -3,11 +3,7 @@ import { Link } from 'react-router-dom';
 import Menu from './Menu';
 import Cart from './Cart';
 import OrderForm from './OrderForm';
-
-// URL backend:
-// - Khi chạy trên máy (npm run dev): dùng https://rauma.onrender.com/api
-// - Khi deploy: đặt biến môi trường REACT_APP_API_URL thành URL backend (vd: https://rauma.onrender.com/api)
-const API_URL = process.env.REACT_APP_API_URL || 'https://rauma.onrender.com/api';
+import { menuAPI, ordersAPI } from '../services/api';
 
 function HomePage() {
   const [menuItems, setMenuItems] = useState([]);
@@ -23,13 +19,7 @@ function HomePage() {
   const fetchMenuItems = async () => {
     try {
       setError(null);
-      const response = await fetch(`${API_URL}/menu`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const data = await menuAPI.getAll();
       setMenuItems(data);
       setLoading(false);
     } catch (error) {
@@ -93,21 +83,10 @@ function HomePage() {
     };
 
     try {
-      const response = await fetch(`${API_URL}/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-      });
-
-      if (response.ok) {
-        alert('Đặt hàng thành công!');
-        setCart([]);
-        setShowOrderForm(false);
-      } else {
-        alert('Có lỗi xảy ra khi đặt hàng');
-      }
+      await ordersAPI.create(orderData);
+      alert('Đặt hàng thành công!');
+      setCart([]);
+      setShowOrderForm(false);
     } catch (error) {
       console.error('Error placing order:', error);
       alert('Có lỗi xảy ra khi đặt hàng');

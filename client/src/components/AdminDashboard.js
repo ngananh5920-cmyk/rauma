@@ -23,12 +23,13 @@ function AdminDashboard() {
     // Kiểm tra authentication
     const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
     if (!isAuthenticated) {
-      navigate('/admin');
+      navigate('/admin', { replace: true });
       return;
     }
 
     fetchOrders();
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchOrders = async () => {
     try {

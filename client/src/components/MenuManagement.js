@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './OrdersManagement.css';
-
-// URL backend mặc định khi chạy local
-const API_URL = process.env.REACT_APP_API_URL || 'https://rauma.onrender.com/api';
+import { menuAPI, uploadAPI, getImageUrl } from '../services/api';
 
 function MenuManagement() {
   const [items, setItems] = useState([]);
@@ -25,11 +23,7 @@ function MenuManagement() {
   const fetchMenu = async () => {
     try {
       setError(null);
-      const response = await fetch(`${API_URL}/menu`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+      const data = await menuAPI.getAll();
       setItems(data);
       setLoading(false);
     } catch (err) {
@@ -89,24 +83,7 @@ function MenuManagement() {
     // Nếu có chọn file ảnh, upload trước rồi lấy URL trả về
     if (imageFile) {
       try {
-        const formData = new FormData();
-        formData.append('image', imageFile);
-
-        // Lấy base URL của backend (bỏ /api ở cuối nếu có)
-        const baseUrl = API_URL.endsWith('/api')
-          ? API_URL.slice(0, -4)
-          : API_URL;
-
-        const uploadResponse = await fetch(`${baseUrl}/api/upload`, {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error(`HTTP error! status: ${uploadResponse.status}`);
-        }
-
-        const uploadData = await uploadResponse.json();
+        const uploadData = await uploadAPI.uploadImage(imageFile);
         imageUrlToUse = uploadData.image_url || imageUrlToUse;
       } catch (err) {
         console.error('Error uploading image:', err);
@@ -124,21 +101,10 @@ function MenuManagement() {
     };
 
     try {
-      const url = editingItem
-        ? `${API_URL}/menu/${editingItem.id}`
-        : `${API_URL}/menu`;
-      const method = editingItem ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (editingItem) {
+        await menuAPI.update(editingItem.id, payload);
+      } else {
+        await menuAPI.create(payload);
       }
 
       await fetchMenu();
@@ -152,12 +118,7 @@ function MenuManagement() {
   const handleDelete = async (item) => {
     if (!window.confirm(`Bạn có chắc muốn xóa món "${item.name}"?`)) return;
     try {
-      const response = await fetch(`${API_URL}/menu/${item.id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      await menuAPI.delete(item.id);
       await fetchMenu();
       if (editingItem && editingItem.id === item.id) {
         resetForm();
@@ -218,9 +179,12 @@ function MenuManagement() {
                   {item.image_url && (
                     <div style={{ marginTop: '0.5rem' }}>
                       <img
-                        src={item.image_url}
+                        src={getImageUrl(item.image_url)}
                         alt={item.name}
                         style={{ width: '100%', maxHeight: 140, objectFit: 'cover', borderRadius: 8 }}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
                       />
                     </div>
                   )}

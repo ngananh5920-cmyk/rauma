@@ -11,6 +11,7 @@ try {
   console.warn('Multer chưa được cài, API /api/upload sẽ bị tắt. Bỏ qua cảnh báo này nếu bạn không dùng upload ảnh.');
 }
 const { initDatabase, seedDatabase } = require('./database');
+const { addOrderToSheets, updateOrderStatusInSheets } = require('./googleSheets');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -200,27 +201,37 @@ app.delete('/api/menu/:id', (req, res) => {
 });
 
 // Create new order
-app.post('/api/orders', (req, res) => {
+app.post('/api/orders', async (req, res) => {
   const { items, total, customer_name, customer_phone, delivery_address } = req.body;
   const created_at = new Date().toISOString();
   
   db.run(
     'INSERT INTO orders (items, total, customer_name, customer_phone, delivery_address, created_at, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
     [JSON.stringify(items), total, customer_name || null, customer_phone || null, delivery_address || null, created_at, 'pending'],
-    function(err) {
+    async function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
-      res.json({ 
-        id: this.lastID, 
-        items, 
-        total, 
-        customer_name, 
-        customer_phone, 
+      
+      const orderData = {
+        id: this.lastID,
+        items,
+        total,
+        customer_name,
+        customer_phone,
         delivery_address,
-        created_at, 
-        status: 'pending' 
-      });
+        created_at,
+        status: 'pending'
+      };
+
+      // Ghi đơn hàng lên Google Sheets (không chặn response nếu có lỗi)
+      try {
+        await addOrderToSheets(orderData);
+      } catch (error) {
+        console.error('Lỗi khi ghi lên Google Sheets (không ảnh hưởng đến đơn hàng):', error);
+      }
+
+      res.json(orderData);
     }
   );
 });
@@ -258,17 +269,25 @@ app.get('/api/orders/:id', (req, res) => {
 });
 
 // Update order status
-app.patch('/api/orders/:id/status', (req, res) => {
+app.patch('/api/orders/:id/status', async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
   
-  db.run('UPDATE orders SET status = ? WHERE id = ?', [status, id], function(err) {
+  db.run('UPDATE orders SET status = ? WHERE id = ?', [status, id], async function(err) {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
     if (this.changes === 0) {
       return res.status(404).json({ error: 'Order not found' });
     }
+    
+    // Cập nhật trạng thái trong Google Sheets (không chặn response nếu có lỗi)
+    try {
+      await updateOrderStatusInSheets(id, status);
+    } catch (error) {
+      console.error('Lỗi khi cập nhật Google Sheets (không ảnh hưởng đến cập nhật):', error);
+    }
+    
     res.json({ message: 'Order status updated successfully' });
   });
 });

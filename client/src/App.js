@@ -4,6 +4,7 @@ import './App.css';
 import HomePage from './components/HomePage';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -14,9 +15,9 @@ function App() {
         <Route 
           path="/admin/dashboard" 
           element={
-            localStorage.getItem('adminAuthenticated') === 'true' 
-              ? <AdminDashboard /> 
-              : <Navigate to="/admin" replace />
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
           } 
         />
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './AdminLogin.css';
 
@@ -10,15 +10,26 @@ function AdminLogin() {
   // Password đơn giản - trong thực tế nên dùng authentication phức tạp hơn
   const ADMIN_PASSWORD = 'tpc36pka';
 
+  // Nếu đã đăng nhập, tự động redirect đến dashboard
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
+    if (isAuthenticated) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [navigate]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
 
     if (password === ADMIN_PASSWORD) {
+      // Set authentication
       localStorage.setItem('adminAuthenticated', 'true');
-      navigate('/admin/dashboard');
+      // Navigate ngay lập tức với replace để không thể quay lại trang login
+      navigate('/admin/dashboard', { replace: true });
     } else {
       setError('Mật khẩu không đúng');
+      setPassword(''); // Xóa password khi sai
     }
   };
 

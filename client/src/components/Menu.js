@@ -1,5 +1,6 @@
 import React from 'react';
 import './Menu.css';
+import { getImageUrl } from '../services/api';
 
 function Menu({ title, items, onAddToCart }) {
   const formatPrice = (price) => {
@@ -15,9 +16,12 @@ function Menu({ title, items, onAddToCart }) {
             {item.image_url && (
               <div className="menu-item-image-wrapper">
                 <img
-                  src={item.image_url}
+                  src={getImageUrl(item.image_url)}
                   alt={item.name}
                   className="menu-item-image"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
                 />
               </div>
             )}

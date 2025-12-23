@@ -17,6 +17,9 @@ client/dist/
 .env.test.local
 .env.production.local
 
+# Google Sheets credentials
+server/credentials.json
+
 # Logs
 npm-debug.log*
 yarn-debug.log*

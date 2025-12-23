@@ -1,10 +1,14 @@
 # Hướng dẫn kiểm tra kết nối Frontend và Backend
 
-## Các vấn đề đã được sửa:
+## Các cải tiến đã được thực hiện:
 
 1. ✅ **Database initialization**: Đã sửa lại để database được khởi tạo đúng cách trước khi server nhận requests
 2. ✅ **Error handling**: Thêm xử lý lỗi tốt hơn ở frontend với thông báo rõ ràng
 3. ✅ **API connection**: Đảm bảo frontend có thể kết nối với backend qua proxy
+4. ✅ **Proxy configuration**: Đã thêm proxy vào `client/package.json` để tự động chuyển tiếp requests từ frontend đến backend trong development
+5. ✅ **Centralized API service**: Đã tạo file `client/src/services/api.js` để quản lý tất cả API calls một cách tập trung
+6. ✅ **Image URL handling**: Đã thêm helper function `getImageUrl()` để xử lý image URLs đúng cách
+7. ✅ **CORS configuration**: Backend đã được cấu hình CORS để cho phép frontend kết nối
 
 ## Cách kiểm tra (khi chạy trên máy local):
 
@@ -22,19 +26,23 @@ Hoặc dùng PowerShell (kiểm tra backend local):
 Invoke-WebRequest -Uri "https://rauma.onrender.com/api/menu" | Select-Object -ExpandProperty Content
 ```
 
-### 2. Kiểm tra Frontend (Port 3000)
+### 2. Kiểm tra Frontend (Port 4000)
 
 Truy cập:
 ```
-http://localhost:3000
+http://localhost:4000
 ```
 
 Nếu frontend không kết nối được với backend, bạn sẽ thấy thông báo lỗi với nút "Thử lại".
 
 Frontend đang gọi API theo nguyên tắc:
 
-- Mặc định (local): `https://rauma.onrender.com/api/...`
-- Khi deploy: dùng biến môi trường `REACT_APP_API_URL` để trỏ đến URL backend (vd: `https://rauma.onrender.com/api`)
+- **Development (local)**: Sử dụng proxy trong `client/package.json` - frontend tự động chuyển tiếp requests đến `https://rauma.onrender.com`
+  - API calls sẽ được gọi như: `/api/menu`, `/api/orders`, v.v.
+  - Proxy sẽ tự động chuyển thành: `https://rauma.onrender.com/api/menu`, `https://rauma.onrender.com/api/orders`, v.v.
+- **Production**: Dùng biến môi trường `REACT_APP_API_URL` để trỏ đến URL backend (vd: `http://your-backend-url.com/api`)
+
+**Lưu ý**: Tất cả API calls được quản lý tập trung trong file `client/src/services/api.js` để dễ bảo trì và cập nhật.
 
 ### 3. Kiểm tra các process đang chạy
 
@@ -42,8 +50,8 @@ Frontend đang gọi API theo nguyên tắc:
 # Kiểm tra port 5000 (backend)
 netstat -ano | findstr ":5000"
 
-# Kiểm tra port 3000 (frontend)
-netstat -ano | findstr ":3000"
+# Kiểm tra port 4000 (frontend)
+netstat -ano | findstr ":4000"
 ```
 
 ### 4. Kiểm tra log
@@ -63,9 +71,11 @@ Khi chạy `npm run dev`, bạn sẽ thấy:
 3. Xem log trong terminal để tìm lỗi cụ thể
 
 ### Frontend không kết nối được:
-1. Đảm bảo backend đang chạy trước
-2. Kiểm tra proxy trong `client/package.json` có đúng không
-3. Kiểm tra console trong browser (F12) để xem lỗi cụ thể
+1. Đảm bảo backend đang chạy trước (port 5000)
+2. Kiểm tra proxy trong `client/package.json` có đúng không (phải có `"proxy": "https://rauma.onrender.com"`)
+3. Nếu đã thêm proxy, cần restart frontend server (dừng và chạy lại `npm run client`)
+4. Kiểm tra console trong browser (F12) để xem lỗi cụ thể
+5. Kiểm tra Network tab trong DevTools để xem requests có được gửi đúng không
 
 ## Khởi động lại ứng dụng:
 
