@@ -3,6 +3,7 @@ import './OrdersManagement.css';
 import { ordersAPI } from '../services/api';
 import { useNotification } from '../hooks/useNotification';
 import Notification from './Notification';
+import PasswordModal from './PasswordModal';
 
 function OrdersManagement({ onOrderUpdate }) {
   const { notification, showNotification, hideNotification } = useNotification();
@@ -10,6 +11,10 @@ function OrdersManagement({ onOrderUpdate }) {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
 
   useEffect(() => {
     fetchOrders();
@@ -46,6 +51,91 @@ function OrdersManagement({ onOrderUpdate }) {
       console.error('Error updating order status:', error);
       showNotification('Có lỗi xảy ra khi cập nhật trạng thái', 'error');
     }
+  };
+
+  const handleEditOrder = () => {
+    if (!selectedOrder) return;
+    setEditForm({
+      customer_name: selectedOrder.customer_name || '',
+      customer_phone: selectedOrder.customer_phone || '',
+      delivery_address: selectedOrder.delivery_address || '',
+      delivery_time: selectedOrder.delivery_time || '',
+      status: selectedOrder.status || 'pending',
+      items: selectedOrder.items.map(item => ({ ...item })),
+    });
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedOrder || !editForm) return;
+    
+    // Tính lại tổng tiền
+    const newTotal = editForm.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    try {
+      await ordersAPI.update(selectedOrder.id, {
+        ...editForm,
+        total: newTotal,
+      });
+      await fetchOrders();
+      setIsEditing(false);
+      setEditForm(null);
+      showNotification('Cập nhật đơn hàng thành công', 'success');
+      if (onOrderUpdate) {
+        onOrderUpdate();
+      }
+    } catch (error) {
+      console.error('Error updating order:', error);
+      showNotification('Có lỗi xảy ra khi cập nhật đơn hàng', 'error');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditForm(null);
+  };
+
+  const handleDeleteOrder = () => {
+    if (!selectedOrder) return;
+    setPendingAction(() => async () => {
+      try {
+        await ordersAPI.delete(selectedOrder.id);
+        await fetchOrders();
+        setSelectedOrder(null);
+        showNotification('Xóa đơn hàng thành công', 'success');
+        if (onOrderUpdate) {
+          onOrderUpdate();
+        }
+      } catch (error) {
+        console.error('Error deleting order:', error);
+        showNotification('Có lỗi xảy ra khi xóa đơn hàng', 'error');
+      }
+    });
+    setShowPasswordModal(true);
+  };
+
+  const handlePasswordConfirm = () => {
+    if (pendingAction) {
+      pendingAction();
+      setPendingAction(null);
+    }
+  };
+
+  const handleEditItemChange = (index, field, value) => {
+    if (!editForm) return;
+    const newItems = [...editForm.items];
+    if (field === 'quantity' || field === 'price') {
+      newItems[index][field] = parseFloat(value) || 0;
+    } else {
+      newItems[index][field] = value;
+    }
+    setEditForm({ ...editForm, items: newItems });
+  };
+
+  const handleRemoveItem = (index) => {
+    if (!editForm) return;
+    const newItems = editForm.items.filter((_, i) => i !== index);
+    setEditForm({ ...editForm, items: newItems });
   };
 
   const formatPrice = (price) => {
@@ -196,43 +286,166 @@ function OrdersManagement({ onOrderUpdate }) {
               <p><strong>Thời gian đặt:</strong> {formatDate(selectedOrder.created_at)}</p>
             </div>
 
-            <div className="detail-section">
-              <h4>Cập nhật trạng thái</h4>
-              <div className="status-buttons">
-                {selectedOrder.status === 'pending' && (
-                  <>
+            {!isEditing ? (
+              <>
+                <div className="detail-section">
+                  <h4>Cập nhật trạng thái</h4>
+                  <div className="status-buttons">
+                    {selectedOrder.status === 'pending' && (
+                      <>
+                        <button
+                          className="btn-confirm"
+                          onClick={() => updateOrderStatus(selectedOrder.id, 'confirmed')}
+                        >
+                          Xác nhận đơn hàng
+                        </button>
+                        <button
+                          className="btn-cancel"
+                          onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')}
+                        >
+                          Hủy đơn hàng
+                        </button>
+                      </>
+                    )}
+                    {selectedOrder.status === 'confirmed' && (
+                      <>
+                        <button
+                          className="btn-complete"
+                          onClick={() => updateOrderStatus(selectedOrder.id, 'completed')}
+                        >
+                          Hoàn thành
+                        </button>
+                        <button
+                          className="btn-cancel"
+                          onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')}
+                        >
+                          Hủy đơn hàng
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="detail-section">
+                  <h4>Thao tác</h4>
+                  <div className="status-buttons">
                     <button
-                      className="btn-confirm"
-                      onClick={() => updateOrderStatus(selectedOrder.id, 'confirmed')}
+                      className="btn-edit"
+                      onClick={() => {
+                        setPendingAction(() => handleEditOrder);
+                        setShowPasswordModal(true);
+                      }}
                     >
-                      Xác nhận đơn hàng
+                      Sửa đơn hàng
                     </button>
                     <button
-                      className="btn-cancel"
-                      onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')}
+                      className="btn-delete"
+                      onClick={handleDeleteOrder}
                     >
-                      Hủy đơn hàng
+                      Xóa đơn hàng
                     </button>
-                  </>
-                )}
-                {selectedOrder.status === 'confirmed' && (
-                  <>
-                    <button
-                      className="btn-complete"
-                      onClick={() => updateOrderStatus(selectedOrder.id, 'completed')}
-                    >
-                      Hoàn thành
-                    </button>
-                    <button
-                      className="btn-cancel"
-                      onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')}
-                    >
-                      Hủy đơn hàng
-                    </button>
-                  </>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="detail-section">
+                <h4>Chỉnh sửa đơn hàng</h4>
+                {editForm && (
+                  <div className="edit-order-form">
+                    <div className="form-group">
+                      <label>Tên khách hàng</label>
+                      <input
+                        type="text"
+                        value={editForm.customer_name}
+                        onChange={(e) => setEditForm({ ...editForm, customer_name: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Số điện thoại</label>
+                      <input
+                        type="text"
+                        value={editForm.customer_phone}
+                        onChange={(e) => setEditForm({ ...editForm, customer_phone: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Địa chỉ giao hàng</label>
+                      <textarea
+                        value={editForm.delivery_address}
+                        onChange={(e) => setEditForm({ ...editForm, delivery_address: e.target.value })}
+                        rows="3"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Thời gian giao hàng</label>
+                      <input
+                        type="text"
+                        value={editForm.delivery_time}
+                        onChange={(e) => setEditForm({ ...editForm, delivery_time: e.target.value })}
+                        placeholder="VD: 2 giờ"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Trạng thái</label>
+                      <select
+                        value={editForm.status}
+                        onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                      >
+                        <option value="pending">Chờ xác nhận</option>
+                        <option value="confirmed">Đã xác nhận</option>
+                        <option value="completed">Hoàn thành</option>
+                        <option value="cancelled">Đã hủy</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Danh sách món</label>
+                      {editForm.items.map((item, index) => (
+                        <div key={index} className="edit-item-row">
+                          <input
+                            type="text"
+                            value={item.name}
+                            onChange={(e) => handleEditItemChange(index, 'name', e.target.value)}
+                            placeholder="Tên món"
+                          />
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => handleEditItemChange(index, 'quantity', e.target.value)}
+                            placeholder="SL"
+                            min="1"
+                          />
+                          <input
+                            type="number"
+                            value={item.price}
+                            onChange={(e) => handleEditItemChange(index, 'price', e.target.value)}
+                            placeholder="Giá"
+                            min="0"
+                          />
+                          <button
+                            type="button"
+                            className="btn-remove-item"
+                            onClick={() => handleRemoveItem(index)}
+                          >
+                            Xóa
+                          </button>
+                        </div>
+                      ))}
+                      <div className="order-total">
+                        <strong>Tổng cộng: {formatPrice(editForm.items.reduce((sum, item) => sum + (item.price * item.quantity), 0))}đ</strong>
+                      </div>
+                    </div>
+                    <div className="status-buttons">
+                      <button className="btn-confirm" onClick={handleSaveEdit}>
+                        Lưu thay đổi
+                      </button>
+                      <button className="btn-cancel" onClick={handleCancelEdit}>
+                        Hủy
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>
@@ -245,6 +458,17 @@ function OrdersManagement({ onOrderUpdate }) {
           onClose={hideNotification}
         />
       )}
+
+      <PasswordModal
+        isOpen={showPasswordModal}
+        onClose={() => {
+          setShowPasswordModal(false);
+          setPendingAction(null);
+        }}
+        onConfirm={handlePasswordConfirm}
+        title="Xác nhận mật khẩu"
+        message="Vui lòng nhập mật khẩu để thực hiện thao tác này"
+      />
     </div>
   );
 }

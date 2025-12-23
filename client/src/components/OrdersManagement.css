@@ -389,6 +389,30 @@
   box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
 }
 
+.btn-edit {
+  background: #17a2b8;
+  color: white;
+  box-shadow: 0 2px 6px rgba(23, 162, 184, 0.3);
+}
+
+.btn-edit:hover {
+  background: #138496;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+}
+
+.btn-delete {
+  background: #dc3545;
+  color: white;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+}
+
+.btn-delete:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.1); }
@@ -429,6 +453,64 @@
 .detail-section textarea {
   resize: vertical;
   min-height: 80px;
+}
+
+/* Edit order form styles */
+.edit-order-form {
+  margin-top: 1rem;
+}
+
+.edit-order-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.edit-order-form .form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.edit-item-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.edit-item-row input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.btn-remove-item {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-remove-item:hover {
+  background: #c82333;
+}
+
+@media (max-width: 768px) {
+  .edit-item-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .btn-remove-item {
+    width: 100%;
+  }
 }
 
 @media (max-width: 1200px) {

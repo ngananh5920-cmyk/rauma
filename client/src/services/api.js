@@ -144,6 +144,21 @@ export const ordersAPI = {
       body: JSON.stringify({ status }),
     });
   },
+
+  // Cập nhật order (full update)
+  update: async (id, orderData) => {
+    return fetchAPI(`/orders/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(orderData),
+    });
+  },
+
+  // Xóa order
+  delete: async (id) => {
+    return fetchAPI(`/orders/${id}`, {
+      method: 'DELETE',
+    });
+  },
 };
 
 // Upload API

@@ -293,6 +293,51 @@ app.patch('/api/orders/:id/status', async (req, res) => {
   });
 });
 
+// Update order (full update)
+app.put('/api/orders/:id', async (req, res) => {
+  const { id } = req.params;
+  const { items, total, customer_name, customer_phone, delivery_address, delivery_time, status } = req.body;
+  
+  db.run(
+    'UPDATE orders SET items = ?, total = ?, customer_name = ?, customer_phone = ?, delivery_address = ?, delivery_time = ?, status = ? WHERE id = ?',
+    [JSON.stringify(items), total, customer_name || null, customer_phone || null, delivery_address || null, delivery_time || null, status || 'pending', id],
+    async function(err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+      
+      // Cập nhật trong Google Sheets nếu có thay đổi status
+      if (status) {
+        try {
+          await updateOrderStatusInSheets(id, status);
+        } catch (error) {
+          console.error('Lỗi khi cập nhật Google Sheets:', error);
+        }
+      }
+      
+      res.json({ message: 'Order updated successfully' });
+    }
+  );
+});
+
+// Delete order
+app.delete('/api/orders/:id', async (req, res) => {
+  const { id } = req.params;
+  
+  db.run('DELETE FROM orders WHERE id = ?', [id], function(err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    res.json({ message: 'Order deleted successfully' });
+  });
+});
+
 // Serve static files from React app in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/build')));
