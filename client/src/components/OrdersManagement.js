@@ -216,36 +216,20 @@ function OrdersManagement({ onOrderUpdate }) {
                   </>
                 )}
                 {selectedOrder.status === 'confirmed' && (
-                  <button
-                    className="btn-prepare"
-                    onClick={() => updateOrderStatus(selectedOrder.id, 'preparing')}
-                  >
-                    Bắt đầu chuẩn bị
-                  </button>
-                )}
-                {selectedOrder.status === 'preparing' && (
-                  <button
-                    className="btn-deliver"
-                    onClick={() => updateOrderStatus(selectedOrder.id, 'delivering')}
-                  >
-                    Bắt đầu giao hàng
-                  </button>
-                )}
-                {selectedOrder.status === 'delivering' && (
-                  <button
-                    className="btn-complete"
-                    onClick={() => updateOrderStatus(selectedOrder.id, 'completed')}
-                  >
-                    Hoàn thành
-                  </button>
-                )}
-                {selectedOrder.status !== 'completed' && selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'pending' && (
-                  <button
-                    className="btn-cancel"
-                    onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')}
-                  >
-                    Hủy đơn hàng
-                  </button>
+                  <>
+                    <button
+                      className="btn-complete"
+                      onClick={() => updateOrderStatus(selectedOrder.id, 'completed')}
+                    >
+                      Hoàn thành
+                    </button>
+                    <button
+                      className="btn-cancel"
+                      onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')}
+                    >
+                      Hủy đơn hàng
+                    </button>
+                  </>
                 )}
               </div>
             </div>
