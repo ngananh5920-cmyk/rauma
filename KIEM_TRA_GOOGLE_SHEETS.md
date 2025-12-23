@@ -77,3 +77,4 @@ Khi tạo đơn hàng mới, kiểm tra console log của backend:
 3. Kiểm tra console log của backend
 4. Mở Google Sheet và kiểm tra xem có dữ liệu mới không
 
+

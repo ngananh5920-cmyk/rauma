@@ -28,6 +28,43 @@ function getStatusLabel(status) {
 }
 
 /**
+ * Chuyển đổi thời gian từ UTC sang múi giờ Việt Nam (UTC+7) và format
+ * @param {string} isoString - Thời gian dạng ISO string (UTC)
+ * @returns {string} - Thời gian đã format theo múi giờ Việt Nam
+ */
+function formatVietnamTime(isoString) {
+  if (!isoString) {
+    // Nếu không có thời gian, dùng thời gian hiện tại
+    const now = new Date();
+    return now.toLocaleString('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+  }
+
+  // Chuyển đổi từ UTC sang múi giờ Việt Nam (UTC+7)
+  const date = new Date(isoString);
+  
+  // Format theo múi giờ Việt Nam
+  return date.toLocaleString('vi-VN', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+}
+
+/**
  * Khởi tạo Google Sheets client
  * Hỗ trợ 2 cách: Service Account (dùng file JSON) hoặc OAuth2 (dùng token)
  */
@@ -97,7 +134,7 @@ async function addOrderToSheets(orderData) {
     
     const row = [
       orderData.id || '',                    // ID đơn hàng
-      new Date().toLocaleString('vi-VN'),    // Thời gian đặt hàng
+      formatVietnamTime(orderData.created_at), // Thời gian đặt hàng (múi giờ Việt Nam)
       orderData.customer_name || '',         // Tên khách hàng
       orderData.customer_phone || '',        // Số điện thoại
       orderData.delivery_address || '',      // Địa chỉ giao hàng
