@@ -172,18 +172,26 @@ async function addOrderToSheets(orderData) {
       .map(item => `${item.name} (x${item.quantity})`)
       .join(', ');
     
+    // QUAN TRỌNG: Thứ tự phải khớp với header
+    // Header: A=ID, B=Thời gian, C=Tên, D=SĐT, E=Địa chỉ, F=TG giao, G=Món, H=SL, I=Tổng, J=Trạng thái
     const row = [
-      orderData.id || '',                    // ID đơn hàng
-      formatVietnamTime(orderData.created_at), // Thời gian đặt hàng (múi giờ Việt Nam)
-      orderData.customer_name || '',         // Tên khách hàng
-      orderData.customer_phone || '',        // Số điện thoại
-      orderData.delivery_address || '',      // Địa chỉ giao hàng
-      orderData.delivery_time || '',         // Thời gian giao hàng
-      itemsText,                             // Danh sách món
-      orderData.items.length,                 // Số lượng món
-      orderData.total || 0,                  // Tổng tiền
-      getStatusLabel(orderData.status || 'pending'), // Trạng thái (tiếng Việt)
+      orderData.id || '',                    // A (0): ID đơn hàng
+      formatVietnamTime(orderData.created_at), // B (1): Thời gian đặt hàng (múi giờ Việt Nam)
+      orderData.customer_name || '',         // C (2): Tên khách hàng
+      orderData.customer_phone || '',        // D (3): Số điện thoại
+      orderData.delivery_address || '',      // E (4): Địa chỉ giao hàng
+      orderData.delivery_time || '',         // F (5): Thời gian giao hàng
+      itemsText,                             // G (6): Danh sách món
+      orderData.items.length,                 // H (7): Số lượng món
+      orderData.total || 0,                  // I (8): Tổng tiền
+      getStatusLabel(orderData.status || 'pending'), // J (9): Trạng thái (tiếng Việt)
     ];
+
+    // Kiểm tra thứ tự trước khi ghi
+    if (row.length !== 10) {
+      console.error(`❌ Lỗi: Row có ${row.length} phần tử, cần đúng 10 phần tử`);
+    }
+    console.log(`📝 Ghi đơn hàng #${orderData.id}: I(Tổng tiền)=${row[8]}, J(Trạng thái)=${row[9]}`);
 
     // Kiểm tra xem sheet có tồn tại không, nếu không thì tạo mới
     try {
