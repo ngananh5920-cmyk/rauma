@@ -118,7 +118,7 @@ function HomePage() {
               <p>{error}</p>
               <p>
                 Vui lòng đảm bảo backend đang chạy tại{' '}
-                <strong>https://rauma.onrender.com</strong>
+                <strong>http://localhost:5000</strong> (khi chạy trên máy)
               </p>
               <button onClick={fetchMenuItems} className="retry-btn">Thử lại</button>
             </div>

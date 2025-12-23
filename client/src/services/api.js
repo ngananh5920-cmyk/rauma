@@ -9,10 +9,10 @@ const getApiBaseUrl = () => {
     return process.env.REACT_APP_API_URL;
   }
   
-  // Development: sử dụng proxy (React sẽ tự động proxy đến https://rauma.onrender.com)
+  // Development: sử dụng proxy (React sẽ tự động proxy đến http://localhost:5000)
   // Production: sử dụng full URL
   if (process.env.NODE_ENV === 'production') {
-    return 'https://rauma.onrender.com/api';
+    return 'http://localhost:5000/api';
   }
   
   return '/api';
@@ -26,7 +26,7 @@ const getBackendBaseUrl = () => {
   }
   
   if (process.env.NODE_ENV === 'production') {
-    return 'https://rauma.onrender.com';
+    return 'http://localhost:5000';
   }
   
   return '';

@@ -5,7 +5,7 @@ import MenuManagement from './MenuManagement';
 import './AdminDashboard.css';
 
 // URL backend mặc định khi chạy local
-const API_URL = process.env.REACT_APP_API_URL || 'https://rauma.onrender.com/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 function AdminDashboard() {
   const [, setOrders] = useState([]);
