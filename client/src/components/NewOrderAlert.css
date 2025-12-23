@@ -1,0 +1,251 @@
+.new-order-alert {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 4000;
+  animation: slideInRight 0.3s ease, pulse 2s ease-in-out infinite;
+  max-width: 420px;
+  min-width: 350px;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 8px 30px rgba(255, 152, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 8px 40px rgba(255, 152, 0, 0.6);
+  }
+}
+
+.new-order-alert-content {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 30px rgba(255, 152, 0, 0.4);
+  border: 3px solid #ff9800;
+  position: relative;
+  overflow: hidden;
+}
+
+.new-order-alert-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #ff9800 0%, #ff6f00 100%);
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.alert-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.alert-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.alert-title {
+  flex: 1;
+}
+
+.alert-title h3 {
+  margin: 0 0 0.3rem 0;
+  color: #e65100;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.alert-title p {
+  margin: 0;
+  color: #bf360c;
+  font-size: 1rem;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.alert-close {
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.alert-close:hover {
+  background: rgba(255, 152, 0, 0.2);
+  color: #e65100;
+}
+
+.alert-order-info {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.2rem;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.order-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 152, 0, 0.1);
+}
+
+.order-info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.info-value {
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.info-value.highlight {
+  color: #e65100;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.alert-actions {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.btn-accept-order,
+.btn-cancel-order {
+  flex: 1;
+  padding: 0.8rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-accept-order {
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.btn-accept-order:hover {
+  background: linear-gradient(135deg, #45a049 0%, #4CAF50 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.btn-cancel-order {
+  background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btn-cancel-order:hover {
+  background: linear-gradient(135deg, #c82333 0%, #dc3545 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
+@media (max-width: 480px) {
+  .new-order-alert {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+    min-width: auto;
+  }
+
+  .new-order-alert-content {
+    padding: 1.2rem;
+  }
+
+  .alert-icon {
+    font-size: 2rem;
+  }
+
+  .alert-title h3 {
+    font-size: 1.1rem;
+  }
+
+  .alert-title p {
+    font-size: 0.9rem;
+  }
+
+  .alert-order-info {
+    padding: 0.8rem;
+  }
+
+  .order-info-row {
+    padding: 0.4rem 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+
+  .info-value {
+    text-align: left;
+  }
+
+  .alert-actions {
+    flex-direction: column;
+  }
+
+  .btn-accept-order,
+  .btn-cancel-order {
+    width: 100%;
+  }
+}
+

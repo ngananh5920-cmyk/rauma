@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import OrdersManagement from './OrdersManagement';
 import MenuManagement from './MenuManagement';
+import NewOrderAlert from './NewOrderAlert';
 import './AdminDashboard.css';
 
 // URL backend mặc định khi chạy local
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 function AdminDashboard() {
-  const [, setOrders] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -17,6 +18,8 @@ function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'menu'
+  const [newOrderAlert, setNewOrderAlert] = useState(null);
+  const processedOrderIds = useRef(new Set());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,7 +30,22 @@ function AdminDashboard() {
       return;
     }
 
-    fetchOrders();
+    fetchOrders().then((data) => {
+      // Đánh dấu tất cả đơn pending hiện tại là đã xử lý (không hiển thị alert)
+      if (data && data.length > 0) {
+        const currentPendingOrders = data.filter(order => order.status === 'pending');
+        currentPendingOrders.forEach(order => {
+          processedOrderIds.current.add(order.id);
+        });
+      }
+    });
+    
+    // Polling để check đơn mới mỗi 3 giây
+    const interval = setInterval(() => {
+      checkForNewOrders();
+    }, 3000);
+
+    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -61,6 +79,85 @@ function AdminDashboard() {
       console.error('Error fetching orders:', error);
       setLoading(false);
     }
+  };
+
+  const checkForNewOrders = async () => {
+    try {
+      const response = await fetch(`${API_URL}/orders`);
+      if (!response.ok) return;
+      
+      const data = await response.json();
+      // Tìm đơn mới (status = 'pending' và chưa được xử lý)
+      const newPendingOrders = data.filter(order => 
+        order.status === 'pending' && !processedOrderIds.current.has(order.id)
+      );
+
+      if (newPendingOrders.length > 0) {
+        // Lấy đơn mới nhất
+        const latestOrder = newPendingOrders.sort((a, b) => 
+          new Date(b.created_at) - new Date(a.created_at)
+        )[0];
+        
+        // Đánh dấu đã xử lý
+        processedOrderIds.current.add(latestOrder.id);
+        
+        // Hiển thị alert
+        setNewOrderAlert(latestOrder);
+      }
+
+      // Cập nhật danh sách orders
+      setOrders(data);
+    } catch (error) {
+      console.error('Error checking for new orders:', error);
+    }
+  };
+
+  const handleAcceptOrder = async (order) => {
+    try {
+      const response = await fetch(`${API_URL}/orders/${order.id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'confirmed' }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update order status');
+      }
+
+      setNewOrderAlert(null);
+      await fetchOrders();
+    } catch (error) {
+      console.error('Error accepting order:', error);
+      alert('Có lỗi xảy ra khi nhận đơn');
+    }
+  };
+
+  const handleCancelOrder = async (order) => {
+    try {
+      const response = await fetch(`${API_URL}/orders/${order.id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'cancelled' }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update order status');
+      }
+
+      setNewOrderAlert(null);
+      await fetchOrders();
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      alert('Có lỗi xảy ra khi hủy đơn');
+    }
+  };
+
+  const handleCloseAlert = () => {
+    setNewOrderAlert(null);
   };
 
   const handleLogout = () => {
@@ -154,6 +251,15 @@ function AdminDashboard() {
           <MenuManagement />
         )}
       </div>
+
+      {newOrderAlert && (
+        <NewOrderAlert
+          order={newOrderAlert}
+          onAccept={() => handleAcceptOrder(newOrderAlert)}
+          onCancel={() => handleCancelOrder(newOrderAlert)}
+          onClose={handleCloseAlert}
+        />
+      )}
     </div>
   );
 }
