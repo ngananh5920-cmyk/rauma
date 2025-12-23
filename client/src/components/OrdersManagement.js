@@ -116,8 +116,20 @@ function OrdersManagement({ onOrderUpdate }) {
         }
       } catch (error) {
         console.error('Error deleting order:', error);
-        const errorMessage = error.message || 'Có lỗi xảy ra khi xóa đơn hàng';
-        showNotification(errorMessage, 'error');
+        // Nếu lỗi 404 (Not Found), coi như đã xóa thành công
+        if (error.message && (error.message.includes('404') || error.message.includes('Not Found') || error.message.includes('not found'))) {
+          console.log('Order not found (404), treating as successful deletion');
+          await fetchOrders();
+          setSelectedOrder(null);
+          showNotification('Đơn hàng đã được xóa', 'success');
+          if (onOrderUpdate) {
+            onOrderUpdate();
+          }
+        } else {
+          // Chỉ hiện lỗi cho các lỗi khác 404
+          const errorMessage = error.message || 'Có lỗi xảy ra khi xóa đơn hàng';
+          showNotification(errorMessage, 'error');
+        }
       }
     });
     setShowPasswordModal(true);
@@ -172,7 +184,19 @@ function OrdersManagement({ onOrderUpdate }) {
     if (selectedOrders.size === 0) return;
     setPendingAction(() => async () => {
       try {
-        const deletePromises = Array.from(selectedOrders).map(id => ordersAPI.delete(id));
+        const deletePromises = Array.from(selectedOrders).map(async (id) => {
+          try {
+            return await ordersAPI.delete(id);
+          } catch (error) {
+            // Nếu lỗi 404, coi như thành công
+            if (error.message && (error.message.includes('404') || error.message.includes('Not Found') || error.message.includes('not found'))) {
+              console.log(`Order ${id} not found (404), treating as successful deletion`);
+              return { success: true, id };
+            }
+            // Ném lại lỗi khác 404
+            throw error;
+          }
+        });
         await Promise.all(deletePromises);
         await fetchOrders();
         setSelectedOrders(new Set());
@@ -186,7 +210,22 @@ function OrdersManagement({ onOrderUpdate }) {
         }
       } catch (error) {
         console.error('Error deleting orders:', error);
-        showNotification('Có lỗi xảy ra khi xóa đơn hàng', 'error');
+        // Chỉ hiện lỗi cho các lỗi không phải 404
+        if (!error.message || (!error.message.includes('404') && !error.message.includes('Not Found') && !error.message.includes('not found'))) {
+          showNotification('Có lỗi xảy ra khi xóa đơn hàng', 'error');
+        } else {
+          // Nếu chỉ có lỗi 404, coi như thành công
+          await fetchOrders();
+          setSelectedOrders(new Set());
+          setShowBulkActions(false);
+          if (selectedOrder && selectedOrders.has(selectedOrder.id)) {
+            setSelectedOrder(null);
+          }
+          showNotification(`Đã xóa ${selectedOrders.size} đơn hàng thành công`, 'success');
+          if (onOrderUpdate) {
+            onOrderUpdate();
+          }
+        }
       }
     });
     setShowPasswordModal(true);
