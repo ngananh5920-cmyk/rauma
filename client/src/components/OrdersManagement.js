@@ -239,7 +239,7 @@ function OrdersManagement({ onOrderUpdate }) {
                     Hoàn thành
                   </button>
                 )}
-                {selectedOrder.status !== 'completed' && selectedOrder.status !== 'cancelled' && (
+                {selectedOrder.status !== 'completed' && selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'pending' && (
                   <button
                     className="btn-cancel"
                     onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')}
