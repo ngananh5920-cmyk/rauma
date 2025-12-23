@@ -12,14 +12,14 @@
 
 Mở trình duyệt hoặc terminal và kiểm tra (backend local):
 ```
-http://localhost:5000/api/menu
+https://rauma.onrender.com/api/menu
 ```
 
 Nếu backend chạy đúng, bạn sẽ thấy JSON response với danh sách menu items.
 
 Hoặc dùng PowerShell (kiểm tra backend local):
 ```powershell
-Invoke-WebRequest -Uri "http://localhost:5000/api/menu" | Select-Object -ExpandProperty Content
+Invoke-WebRequest -Uri "https://rauma.onrender.com/api/menu" | Select-Object -ExpandProperty Content
 ```
 
 ### 2. Kiểm tra Frontend (Port 3000)
@@ -33,7 +33,7 @@ Nếu frontend không kết nối được với backend, bạn sẽ thấy thô
 
 Frontend đang gọi API theo nguyên tắc:
 
-- Mặc định (local): `http://localhost:5000/api/...`
+- Mặc định (local): `https://rauma.onrender.com/api/...`
 - Khi deploy: dùng biến môi trường `REACT_APP_API_URL` để trỏ đến URL backend (vd: `https://rauma.onrender.com/api`)
 
 ### 3. Kiểm tra các process đang chạy

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './OrdersManagement.css';
 
 // URL backend mặc định khi chạy local
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://rauma.onrender.com/api';
 
 function OrdersManagement({ onOrderUpdate }) {
   const [orders, setOrders] = useState([]);
