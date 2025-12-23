@@ -128,8 +128,24 @@ function AdminDashboard() {
         throw new Error('Failed to update order status');
       }
 
+      // Đánh dấu đơn này đã được xử lý để không hiển thị lại trong alert
+      processedOrderIds.current.add(order.id);
+      
+      // Cập nhật đơn hàng trong state thay vì fetch lại toàn bộ
+      setOrders(prevOrders => {
+        const updatedOrders = prevOrders.map(o => 
+          o.id === order.id ? { ...o, status: 'confirmed' } : o
+        );
+        return updatedOrders;
+      });
+
       setNewOrderAlert(null);
-      await fetchOrders();
+      
+      // Cập nhật stats mà không cần fetch lại toàn bộ
+      setStats(prevStats => ({
+        ...prevStats,
+        pendingOrders: Math.max(0, prevStats.pendingOrders - 1),
+      }));
     } catch (error) {
       console.error('Error accepting order:', error);
       alert('Có lỗi xảy ra khi nhận đơn');
@@ -150,8 +166,24 @@ function AdminDashboard() {
         throw new Error('Failed to update order status');
       }
 
+      // Đánh dấu đơn này đã được xử lý để không hiển thị lại trong alert
+      processedOrderIds.current.add(order.id);
+      
+      // Cập nhật đơn hàng trong state thay vì fetch lại toàn bộ
+      setOrders(prevOrders => {
+        const updatedOrders = prevOrders.map(o => 
+          o.id === order.id ? { ...o, status: 'cancelled' } : o
+        );
+        return updatedOrders;
+      });
+
       setNewOrderAlert(null);
-      await fetchOrders();
+      
+      // Cập nhật stats mà không cần fetch lại toàn bộ
+      setStats(prevStats => ({
+        ...prevStats,
+        pendingOrders: Math.max(0, prevStats.pendingOrders - 1),
+      }));
     } catch (error) {
       console.error('Error cancelling order:', error);
       alert('Có lỗi xảy ra khi hủy đơn');

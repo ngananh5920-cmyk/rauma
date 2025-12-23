@@ -248,7 +248,25 @@ app.get('/api/orders', (req, res) => {
       ...order,
       items: JSON.parse(order.items)
     }));
-    res.json(orders);
+    
+    // Loại bỏ đơn hàng trùng lặp (dựa trên customer_phone + total + created_at trong cùng 1 phút)
+    const uniqueOrders = [];
+    const seenKeys = new Set();
+    
+    orders.forEach(order => {
+      // Tạo key duy nhất dựa trên phone + total + created_at (chỉ lấy đến phút)
+      const createdDate = new Date(order.created_at);
+      const timeKey = `${createdDate.getFullYear()}-${String(createdDate.getMonth() + 1).padStart(2, '0')}-${String(createdDate.getDate()).padStart(2, '0')} ${String(createdDate.getHours()).padStart(2, '0')}:${String(createdDate.getMinutes()).padStart(2, '0')}`;
+      const uniqueKey = `${order.customer_phone || 'no-phone'}_${order.total}_${timeKey}`;
+      
+      // Chỉ thêm đơn hàng nếu chưa thấy key này (giữ lại đơn hàng đầu tiên - mới nhất)
+      if (!seenKeys.has(uniqueKey)) {
+        seenKeys.add(uniqueKey);
+        uniqueOrders.push(order);
+      }
+    });
+    
+    res.json(uniqueOrders);
   });
 });
 
