@@ -149,6 +149,28 @@ function OrdersManagement({ onOrderUpdate }) {
     }
   };
 
+  const handleResetAll = () => {
+    setPendingAction(() => async () => {
+      try {
+        const ADMIN_PASSWORD = 'tpc36pka';
+        await ordersAPI.resetAll(ADMIN_PASSWORD);
+        await fetchOrders();
+        setSelectedOrder(null);
+        setSelectedOrders(new Set());
+        setShowBulkActions(false);
+        showNotification('Đã reset tất cả đơn hàng thành công', 'success');
+        if (onOrderUpdate) {
+          onOrderUpdate();
+        }
+      } catch (error) {
+        console.error('Error resetting orders:', error);
+        const errorMessage = error.message || 'Có lỗi xảy ra khi reset đơn hàng';
+        showNotification(errorMessage, 'error');
+      }
+    });
+    setShowPasswordModal(true);
+  };
+
   const handleEditItemChange = (index, field, value) => {
     if (!editForm) return;
     const newItems = [...editForm.items];
@@ -322,7 +344,15 @@ function OrdersManagement({ onOrderUpdate }) {
     <div className="orders-management">
         <div className="orders-header">
           <h2>Quản lý đơn hàng</h2>
-          <button onClick={fetchOrders} className="refresh-btn">Làm mới</button>
+          <div className="header-actions">
+            <button onClick={fetchOrders} className="refresh-btn">Làm mới</button>
+            <button 
+              onClick={handleResetAll} 
+              className="reset-btn"
+            >
+              Reset tất cả
+            </button>
+          </div>
       </div>
 
       <div className="orders-content">

@@ -316,9 +316,58 @@ async function updateOrderStatusInSheets(orderId, newStatus) {
 // Khởi tạo khi module được load
 initGoogleSheets();
 
+/**
+ * Xóa tất cả dữ liệu trong Google Sheets (giữ lại header)
+ * @returns {Promise<boolean>}
+ */
+async function clearGoogleSheets() {
+  if (!sheets || !SPREADSHEET_ID) {
+    console.warn('⚠️ Google Sheets chưa được cấu hình');
+    return false;
+  }
+
+  try {
+    // Lấy tất cả dữ liệu
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!A:J`,
+    });
+
+    const rows = response.data.values;
+    if (!rows || rows.length <= 1) {
+      console.log('✅ Google Sheets đã trống (chỉ có header)');
+      return true;
+    }
+
+    const dataRowCount = rows.length - 1; // Trừ header
+    console.log(`📊 Tìm thấy ${dataRowCount} dòng dữ liệu trong Google Sheets`);
+
+    // Xóa tất cả dữ liệu từ dòng 2 trở đi (giữ lại header ở dòng 1)
+    if (dataRowCount > 0) {
+      await sheets.spreadsheets.values.clear({
+        spreadsheetId: SPREADSHEET_ID,
+        range: `${SHEET_NAME}!A2:J${rows.length}`,
+      });
+
+      console.log(`✅ Đã xóa ${dataRowCount} dòng dữ liệu trong Google Sheets (giữ lại header)`);
+    }
+
+    return true;
+  } catch (error) {
+    // Nếu sheet không tồn tại hoặc lỗi, bỏ qua
+    if (error.message.includes('Unable to parse range') || error.message.includes('not found')) {
+      console.log('⚠️ Sheet không tồn tại hoặc đã trống');
+      return true;
+    }
+    console.error('❌ Lỗi khi xóa Google Sheets:', error.message);
+    return false;
+  }
+}
+
 module.exports = {
   addOrderToSheets,
   updateOrderStatusInSheets,
   initGoogleSheets,
+  clearGoogleSheets,
 };
 

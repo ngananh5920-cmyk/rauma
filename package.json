@@ -10,7 +10,8 @@
     "install-all": "npm install && cd client && npm install",
     "build": "cd client && npm run build",
     "start": "node server/index.js",
-    "update-sheets-status": "node server/updateSheetsStatus.js"
+    "update-sheets-status": "node server/updateSheetsStatus.js",
+    "reset-orders": "node server/resetOrders.js"
   },
   "keywords": [
     "sales",

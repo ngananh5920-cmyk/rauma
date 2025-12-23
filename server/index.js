@@ -11,7 +11,7 @@ try {
   console.warn('Multer chưa được cài, API /api/upload sẽ bị tắt. Bỏ qua cảnh báo này nếu bạn không dùng upload ảnh.');
 }
 const { initDatabase, seedDatabase } = require('./database');
-const { addOrderToSheets, updateOrderStatusInSheets } = require('./googleSheets');
+const { addOrderToSheets, updateOrderStatusInSheets, clearGoogleSheets } = require('./googleSheets');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -347,6 +347,46 @@ app.delete('/api/orders/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Unexpected error in DELETE /api/orders/:id:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Reset all orders (requires password)
+app.post('/api/orders/reset', async (req, res) => {
+  const { password } = req.body;
+  const ADMIN_PASSWORD = 'tpc36pka'; // Same password as admin login
+  
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    // Xóa tất cả đơn hàng trong database
+    db.run('DELETE FROM orders', async function(err) {
+      if (err) {
+        console.error('Error clearing orders:', err);
+        return res.status(500).json({ error: err.message });
+      }
+
+      const deletedCount = this.changes;
+      console.log(`Reset: Deleted ${deletedCount} orders from database`);
+
+      // Xóa dữ liệu trong Google Sheets (giữ lại header)
+      try {
+        const { clearGoogleSheets } = require('./googleSheets');
+        await clearGoogleSheets();
+      } catch (sheetsError) {
+        console.error('Error clearing Google Sheets:', sheetsError);
+        // Không fail nếu Google Sheets có lỗi
+      }
+
+      res.json({ 
+        message: 'All orders reset successfully',
+        deletedCount 
+      });
+    });
+  } catch (error) {
+    console.error('Error resetting orders:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

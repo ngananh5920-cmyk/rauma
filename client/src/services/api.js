@@ -183,6 +183,14 @@ export const ordersAPI = {
       throw error;
     }
   },
+
+  // Reset tất cả orders
+  resetAll: async (password) => {
+    return fetchAPI('/orders/reset', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    });
+  },
 };
 
 // Upload API
