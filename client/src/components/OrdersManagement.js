@@ -112,8 +112,8 @@ function OrdersManagement({ onOrderUpdate }) {
   if (error) {
     return (
       <div className="orders-management">
-        <div className="error-message">
-          <h2>⚠️ Lỗi</h2>
+            <div className="error-message">
+              <h2>Lỗi</h2>
           <p>{error}</p>
           <button onClick={fetchOrders} className="retry-btn">Thử lại</button>
         </div>
@@ -123,9 +123,9 @@ function OrdersManagement({ onOrderUpdate }) {
 
   return (
     <div className="orders-management">
-      <div className="orders-header">
-        <h2>📋 Quản lý đơn hàng</h2>
-        <button onClick={fetchOrders} className="refresh-btn">🔄 Làm mới</button>
+        <div className="orders-header">
+          <h2>Quản lý đơn hàng</h2>
+          <button onClick={fetchOrders} className="refresh-btn">Làm mới</button>
       </div>
 
       <div className="orders-content">

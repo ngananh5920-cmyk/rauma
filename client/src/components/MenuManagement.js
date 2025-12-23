@@ -148,7 +148,7 @@ function MenuManagement() {
     return (
       <div className="orders-management">
         <div className="error-message">
-          <h2>⚠️ Lỗi</h2>
+          <h2>Lỗi</h2>
           <p>{error}</p>
           <button onClick={fetchMenu} className="retry-btn">Thử lại</button>
         </div>
@@ -162,8 +162,8 @@ function MenuManagement() {
   return (
     <div className="orders-management">
       <div className="orders-header">
-        <h2>🍽 Quản lý thực đơn</h2>
-        <button onClick={fetchMenu} className="refresh-btn">🔄 Làm mới</button>
+        <h2>Quản lý thực đơn</h2>
+        <button onClick={fetchMenu} className="refresh-btn">Làm mới</button>
       </div>
 
       <div className="orders-content">

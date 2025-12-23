@@ -84,9 +84,9 @@ function AdminDashboard() {
     <div className="admin-dashboard">
       <header className="admin-header">
         <div className="admin-header-content">
-          <h1>📊 Bảng điều khiển quản trị</h1>
+          <h1>Bảng điều khiển quản trị</h1>
           <div className="admin-actions">
-            <Link to="/" className="home-link">🏠 Trang chủ</Link>
+            <Link to="/" className="home-link">Trang chủ</Link>
             <button onClick={handleLogout} className="logout-btn">
               Đăng xuất
             </button>
@@ -134,13 +134,13 @@ function AdminDashboard() {
             className={`admin-tab ${activeTab === 'orders' ? 'active' : ''}`}
             onClick={() => setActiveTab('orders')}
           >
-            📋 Đơn hàng
+            Đơn hàng
           </button>
           <button
             className={`admin-tab ${activeTab === 'menu' ? 'active' : ''}`}
             onClick={() => setActiveTab('menu')}
           >
-            🍽 Thực đơn
+            Thực đơn
           </button>
         </div>
 
