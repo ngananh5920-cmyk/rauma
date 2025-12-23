@@ -1,7 +1,7 @@
 {
   "name": "thanh-hoa-club-sales-app",
   "version": "1.0.0",
-  "description": "Ứng dụng bán hàng cho câu lạc bộ sinh viên Thanh Hóa",
+  "description": "Ứng dụng bán hàng cho Câu Lạc Bộ Sinh Viên Thanh Hóa Đại học Phenikaa",
   "main": "server/index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",

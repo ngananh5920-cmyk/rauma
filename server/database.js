@@ -53,6 +53,18 @@ function initDatabase(db, callback) {
           // Column already exists, which is fine
         }
       });
+
+      // Add delivery_time column if it doesn't exist
+      db.run(`
+        ALTER TABLE orders ADD COLUMN delivery_time TEXT
+      `, (err) => {
+        if (err) {
+          const errorMsg = err.message.toLowerCase();
+          if (!errorMsg.includes('duplicate') && !errorMsg.includes('already exists')) {
+            console.error('Error adding delivery_time column:', err);
+          }
+        }
+      });
       
       console.log('Database tables created successfully');
       if (callback) callback(null);

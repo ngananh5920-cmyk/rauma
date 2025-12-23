@@ -202,12 +202,12 @@ app.delete('/api/menu/:id', (req, res) => {
 
 // Create new order
 app.post('/api/orders', async (req, res) => {
-  const { items, total, customer_name, customer_phone, delivery_address } = req.body;
+  const { items, total, customer_name, customer_phone, delivery_address, delivery_time } = req.body;
   const created_at = new Date().toISOString();
   
   db.run(
-    'INSERT INTO orders (items, total, customer_name, customer_phone, delivery_address, created_at, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [JSON.stringify(items), total, customer_name || null, customer_phone || null, delivery_address || null, created_at, 'pending'],
+    'INSERT INTO orders (items, total, customer_name, customer_phone, delivery_address, delivery_time, created_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [JSON.stringify(items), total, customer_name || null, customer_phone || null, delivery_address || null, delivery_time || null, created_at, 'pending'],
     async function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
@@ -220,6 +220,7 @@ app.post('/api/orders', async (req, res) => {
         customer_name,
         customer_phone,
         delivery_address,
+        delivery_time: delivery_time || null,
         created_at,
         status: 'pending'
       };

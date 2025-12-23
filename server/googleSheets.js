@@ -36,37 +36,72 @@ function formatVietnamTime(isoString) {
   let date;
   
   if (!isoString) {
-    // Nếu không có thời gian, dùng thời gian hiện tại
+    // Nếu không có thời gian, dùng thời gian hiện tại (UTC)
     date = new Date();
   } else {
-    // Chuyển đổi từ UTC sang múi giờ Việt Nam (UTC+7)
+    // Chuyển đổi từ ISO string sang Date object
+    // ISO string thường là UTC, nên cần convert sang VN time
     date = new Date(isoString);
   }
 
-  // Sử dụng Intl.DateTimeFormat để format đúng múi giờ Việt Nam
-  const formatter = new Intl.DateTimeFormat('vi-VN', {
-    timeZone: 'Asia/Ho_Chi_Minh',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
+  // Đảm bảo date là valid
+  if (isNaN(date.getTime())) {
+    console.error('Invalid date:', isoString);
+    date = new Date(); // Fallback to current time
+  }
 
-  // Format và tách các phần
-  const parts = formatter.formatToParts(date);
-  
-  const day = parts.find(p => p.type === 'day').value;
-  const month = parts.find(p => p.type === 'month').value;
-  const year = parts.find(p => p.type === 'year').value;
-  const hour = parts.find(p => p.type === 'hour').value;
-  const minute = parts.find(p => p.type === 'minute').value;
-  const second = parts.find(p => p.type === 'second').value;
-  
-  // Format: DD/MM/YYYY, HH:mm:ss
-  return `${day}/${month}/${year}, ${hour}:${minute}:${second}`;
+  try {
+    // Sử dụng Intl.DateTimeFormat để format đúng múi giờ Việt Nam
+    // Đây là cách đáng tin cậy nhất, hoạt động trên mọi server
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+
+    // Format và tách các phần
+    const parts = formatter.formatToParts(date);
+    
+    const day = parts.find(p => p.type === 'day').value;
+    const month = parts.find(p => p.type === 'month').value;
+    const year = parts.find(p => p.type === 'year').value;
+    const hour = parts.find(p => p.type === 'hour').value;
+    const minute = parts.find(p => p.type === 'minute').value;
+    const second = parts.find(p => p.type === 'second').value;
+    
+    // Format: DD/MM/YYYY, HH:mm:ss
+    return `${day}/${month}/${year}, ${hour}:${minute}:${second}`;
+  } catch (error) {
+    // Fallback: Manual calculation nếu Intl không hoạt động
+    console.warn('Intl.DateTimeFormat failed, using manual calculation:', error.message);
+    
+    // Lấy UTC time từ date object (timestamp in milliseconds)
+    const utcTime = date.getTime();
+    
+    // Convert UTC to Vietnam time (UTC+7)
+    // Vietnam is UTC+7, so we add 7 hours (7 * 60 * 60 * 1000 milliseconds)
+    const vietnamOffset = 7 * 60 * 60 * 1000;
+    const vietnamTimestamp = utcTime + vietnamOffset;
+    
+    // Tạo Date object từ timestamp đã convert
+    const vietnamDate = new Date(vietnamTimestamp);
+    
+    // Format manually - sử dụng UTC methods vì timestamp đã được convert
+    // Khi dùng getUTC* methods với timestamp đã +7h, ta sẽ lấy được VN time
+    const day = String(vietnamDate.getUTCDate()).padStart(2, '0');
+    const month = String(vietnamDate.getUTCMonth() + 1).padStart(2, '0');
+    const year = vietnamDate.getUTCFullYear();
+    const hour = String(vietnamDate.getUTCHours()).padStart(2, '0');
+    const minute = String(vietnamDate.getUTCMinutes()).padStart(2, '0');
+    const second = String(vietnamDate.getUTCSeconds()).padStart(2, '0');
+    
+    return `${day}/${month}/${year}, ${hour}:${minute}:${second}`;
+  }
 }
 
 /**
@@ -143,6 +178,7 @@ async function addOrderToSheets(orderData) {
       orderData.customer_name || '',         // Tên khách hàng
       orderData.customer_phone || '',        // Số điện thoại
       orderData.delivery_address || '',      // Địa chỉ giao hàng
+      orderData.delivery_time || '',         // Thời gian giao hàng
       itemsText,                             // Danh sách món
       orderData.items.length,                 // Số lượng món
       orderData.total || 0,                  // Tổng tiền
@@ -173,7 +209,7 @@ async function addOrderToSheets(orderData) {
       // Thêm header row
       await sheets.spreadsheets.values.update({
         spreadsheetId: SPREADSHEET_ID,
-        range: `${SHEET_NAME}!A1:I1`,
+        range: `${SHEET_NAME}!A1:J1`,
         valueInputOption: 'RAW',
         resource: {
           values: [[
@@ -182,6 +218,7 @@ async function addOrderToSheets(orderData) {
             'Tên khách hàng',
             'Số điện thoại',
             'Địa chỉ giao hàng',
+            'Thời gian giao hàng',
             'Danh sách món',
             'Số lượng món',
             'Tổng tiền',
@@ -194,7 +231,7 @@ async function addOrderToSheets(orderData) {
     // Thêm dữ liệu đơn hàng vào sheet
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A:I`,
+      range: `${SHEET_NAME}!A:J`,
       valueInputOption: 'RAW',
       insertDataOption: 'INSERT_ROWS',
       resource: {
@@ -226,7 +263,7 @@ async function updateOrderStatusInSheets(orderId, newStatus) {
     // Lấy tất cả dữ liệu trong sheet
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A:I`,
+      range: `${SHEET_NAME}!A:J`,
     });
 
     const rows = response.data.values;
