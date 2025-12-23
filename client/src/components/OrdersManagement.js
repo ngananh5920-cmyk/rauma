@@ -15,6 +15,8 @@ function OrdersManagement({ onOrderUpdate }) {
   const [editForm, setEditForm] = useState(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+  const [selectedOrders, setSelectedOrders] = useState(new Set());
+  const [showBulkActions, setShowBulkActions] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -138,6 +140,51 @@ function OrdersManagement({ onOrderUpdate }) {
     setEditForm({ ...editForm, items: newItems });
   };
 
+  const handleToggleOrderSelection = (orderId) => {
+    const newSelected = new Set(selectedOrders);
+    if (newSelected.has(orderId)) {
+      newSelected.delete(orderId);
+    } else {
+      newSelected.add(orderId);
+    }
+    setSelectedOrders(newSelected);
+    setShowBulkActions(newSelected.size > 0);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedOrders.size === orders.length) {
+      setSelectedOrders(new Set());
+      setShowBulkActions(false);
+    } else {
+      setSelectedOrders(new Set(orders.map(o => o.id)));
+      setShowBulkActions(true);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedOrders.size === 0) return;
+    setPendingAction(() => async () => {
+      try {
+        const deletePromises = Array.from(selectedOrders).map(id => ordersAPI.delete(id));
+        await Promise.all(deletePromises);
+        await fetchOrders();
+        setSelectedOrders(new Set());
+        setShowBulkActions(false);
+        if (selectedOrder && selectedOrders.has(selectedOrder.id)) {
+          setSelectedOrder(null);
+        }
+        showNotification(`Đã xóa ${selectedOrders.size} đơn hàng thành công`, 'success');
+        if (onOrderUpdate) {
+          onOrderUpdate();
+        }
+      } catch (error) {
+        console.error('Error deleting orders:', error);
+        showNotification('Có lỗi xảy ra khi xóa đơn hàng', 'error');
+      }
+    });
+    setShowPasswordModal(true);
+  };
+
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN').format(price);
   };
@@ -220,7 +267,25 @@ function OrdersManagement({ onOrderUpdate }) {
 
       <div className="orders-content">
         <div className="orders-list">
-          <h3>Tất cả đơn hàng ({orders.length})</h3>
+          <div className="orders-list-header">
+            <h3>Tất cả đơn hàng ({orders.length})</h3>
+            <div className="bulk-actions-header">
+              <button
+                className="btn-select-all"
+                onClick={handleSelectAll}
+              >
+                {selectedOrders.size === orders.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+              </button>
+              {showBulkActions && (
+                <button
+                  className="btn-bulk-delete"
+                  onClick={handleBulkDelete}
+                >
+                  Xóa đã chọn ({selectedOrders.size})
+                </button>
+              )}
+            </div>
+          </div>
           {orders.length === 0 ? (
             <div className="empty-orders">Chưa có đơn hàng nào</div>
           ) : (
@@ -228,20 +293,32 @@ function OrdersManagement({ onOrderUpdate }) {
               {orders.map((order) => (
                 <div
                   key={order.id}
-                  className={`order-card ${selectedOrder?.id === order.id ? 'selected' : ''}`}
-                  onClick={() => setSelectedOrder(order)}
+                  className={`order-card ${selectedOrder?.id === order.id ? 'selected' : ''} ${selectedOrders.has(order.id) ? 'bulk-selected' : ''}`}
                 >
-                  <div className="order-card-header">
-                    <span className="order-id">#{order.id}</span>
-                    <span className={`status-badge ${getStatusBadgeClass(order.status)}`}>
-                      {getStatusLabel(order.status)}
-                    </span>
+                  <div className="order-card-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selectedOrders.has(order.id)}
+                      onChange={() => handleToggleOrderSelection(order.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   </div>
-                  <div className="order-card-body">
-                    <p><strong>Khách hàng:</strong> {order.customer_name || 'N/A'}</p>
-                    <p><strong>SĐT:</strong> {order.customer_phone || 'N/A'}</p>
-                    <p><strong>Tổng tiền:</strong> {formatPrice(order.total)}đ</p>
-                    <p><strong>Thời gian:</strong> {formatDate(order.created_at)}</p>
+                  <div
+                    className="order-card-content"
+                    onClick={() => setSelectedOrder(order)}
+                  >
+                    <div className="order-card-header">
+                      <span className="order-id">#{order.id}</span>
+                      <span className={`status-badge ${getStatusBadgeClass(order.status)}`}>
+                        {getStatusLabel(order.status)}
+                      </span>
+                    </div>
+                    <div className="order-card-body">
+                      <p><strong>Khách hàng:</strong> {order.customer_name || 'N/A'}</p>
+                      <p><strong>SĐT:</strong> {order.customer_phone || 'N/A'}</p>
+                      <p><strong>Tổng tiền:</strong> {formatPrice(order.total)}đ</p>
+                      <p><strong>Thời gian:</strong> {formatDate(order.created_at)}</p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -326,9 +403,9 @@ function OrdersManagement({ onOrderUpdate }) {
                   </div>
                 </div>
 
-                <div className="detail-section">
-                  <h4>Thao tác</h4>
-                  <div className="status-buttons">
+                <div className="detail-section order-actions-section">
+                  <h4>Thao tác với đơn hàng</h4>
+                  <div className="order-action-buttons">
                     <button
                       className="btn-edit"
                       onClick={() => {

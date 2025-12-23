@@ -72,11 +72,59 @@
   gap: 1.5rem;
 }
 
+.orders-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
 .orders-list h3 {
   color: #333;
   font-size: 1.1rem;
-  margin-bottom: 0.8rem;
+  margin: 0;
   font-weight: 600;
+}
+
+.bulk-actions-header {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.btn-select-all,
+.btn-bulk-delete {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-select-all {
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.btn-select-all:hover {
+  background: #e0e0e0;
+}
+
+.btn-bulk-delete {
+  background: #dc3545;
+  color: white;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+}
+
+.btn-bulk-delete:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
 }
 
 .empty-orders {
@@ -114,8 +162,28 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 1rem;
-  cursor: pointer;
   transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  gap: 0.8rem;
+}
+
+.order-card-checkbox {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 0.2rem;
+}
+
+.order-card-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #4CAF50;
+}
+
+.order-card-content {
+  flex: 1;
+  cursor: pointer;
 }
 
 .order-card:hover {
@@ -130,7 +198,18 @@
   box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
 }
 
-.order-card-header {
+.order-card.bulk-selected {
+  border-color: #17a2b8;
+  background: #e0f7fa;
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.2);
+}
+
+.order-card.bulk-selected.selected {
+  border-color: #4CAF50;
+  background: #c8e6c9;
+}
+
+.order-card-content .order-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -502,7 +581,42 @@
   background: #c82333;
 }
 
+.order-actions-section {
+  border-top: 2px solid #e8f5e9;
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.order-action-buttons {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 768px) {
+  .orders-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bulk-actions-header {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .btn-select-all,
+  .btn-bulk-delete {
+    width: 100%;
+  }
+
+  .order-card {
+    flex-direction: column;
+  }
+
+  .order-card-checkbox {
+    align-self: flex-start;
+  }
+
   .edit-item-row {
     grid-template-columns: 1fr;
     gap: 0.5rem;
