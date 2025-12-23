@@ -30,29 +30,21 @@ function getStatusLabel(status) {
 /**
  * Chuyển đổi thời gian từ UTC sang múi giờ Việt Nam (UTC+7) và format
  * @param {string} isoString - Thời gian dạng ISO string (UTC)
- * @returns {string} - Thời gian đã format theo múi giờ Việt Nam
+ * @returns {string} - Thời gian đã format theo múi giờ Việt Nam (DD/MM/YYYY, HH:mm:ss)
  */
 function formatVietnamTime(isoString) {
+  let date;
+  
   if (!isoString) {
     // Nếu không có thời gian, dùng thời gian hiện tại
-    const now = new Date();
-    return now.toLocaleString('vi-VN', {
-      timeZone: 'Asia/Ho_Chi_Minh',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    });
+    date = new Date();
+  } else {
+    // Chuyển đổi từ UTC sang múi giờ Việt Nam (UTC+7)
+    date = new Date(isoString);
   }
 
-  // Chuyển đổi từ UTC sang múi giờ Việt Nam (UTC+7)
-  const date = new Date(isoString);
-  
-  // Format theo múi giờ Việt Nam
-  return date.toLocaleString('vi-VN', {
+  // Sử dụng Intl.DateTimeFormat để format đúng múi giờ Việt Nam
+  const formatter = new Intl.DateTimeFormat('vi-VN', {
     timeZone: 'Asia/Ho_Chi_Minh',
     year: 'numeric',
     month: '2-digit',
@@ -62,6 +54,19 @@ function formatVietnamTime(isoString) {
     second: '2-digit',
     hour12: false
   });
+
+  // Format và tách các phần
+  const parts = formatter.formatToParts(date);
+  
+  const day = parts.find(p => p.type === 'day').value;
+  const month = parts.find(p => p.type === 'month').value;
+  const year = parts.find(p => p.type === 'year').value;
+  const hour = parts.find(p => p.type === 'hour').value;
+  const minute = parts.find(p => p.type === 'minute').value;
+  const second = parts.find(p => p.type === 'second').value;
+  
+  // Format: DD/MM/YYYY, HH:mm:ss
+  return `${day}/${month}/${year}, ${hour}:${minute}:${second}`;
 }
 
 /**
