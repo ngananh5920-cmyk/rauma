@@ -75,9 +75,11 @@ function AdminDashboard() {
         completedOrders,
       });
       setLoading(false);
+      return data;
     } catch (error) {
       console.error('Error fetching orders:', error);
       setLoading(false);
+      return [];
     }
   };
 
