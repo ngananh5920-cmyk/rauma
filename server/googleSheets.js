@@ -285,11 +285,12 @@ async function updateOrderStatusInSheets(orderId, newStatus) {
       return false;
     }
 
-    // Cập nhật trạng thái (cột I - index 8) - chuyển sang tiếng Việt
+    // Cập nhật trạng thái (cột J - index 9) - chuyển sang tiếng Việt
+    // Thứ tự cột: A=ID, B=Thời gian đặt, C=Tên, D=SĐT, E=Địa chỉ, F=Thời gian giao, G=Danh sách món, H=Số lượng, I=Tổng tiền, J=Trạng thái
     const statusLabel = getStatusLabel(newStatus);
     await sheets.spreadsheets.values.update({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!I${rowIndex}`,
+      range: `${SHEET_NAME}!J${rowIndex}`,
       valueInputOption: 'RAW',
       resource: {
         values: [[statusLabel]],
