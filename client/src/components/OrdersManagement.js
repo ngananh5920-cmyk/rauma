@@ -102,15 +102,19 @@ function OrdersManagement({ onOrderUpdate }) {
       console.error('No order selected for deletion');
       return;
     }
-    console.log('Attempting to delete order:', selectedOrder.id);
+    const orderIdToDelete = selectedOrder.id;
+    console.log('Attempting to delete order:', orderIdToDelete);
     setPendingAction(() => async () => {
       try {
-        console.log('Calling ordersAPI.delete for order:', selectedOrder.id);
-        const result = await ordersAPI.delete(selectedOrder.id);
+        console.log('Calling ordersAPI.delete for order:', orderIdToDelete);
+        const result = await ordersAPI.delete(orderIdToDelete);
         console.log('Delete result:', result);
-        await fetchOrders();
+        // Cập nhật state ngay lập tức - xóa đơn hàng khỏi danh sách
+        setOrders(prevOrders => prevOrders.filter(order => order.id !== orderIdToDelete));
         setSelectedOrder(null);
         showNotification('Xóa đơn hàng thành công', 'success');
+        // Sau đó fetch lại để đồng bộ với server
+        await fetchOrders();
         if (onOrderUpdate) {
           onOrderUpdate();
         }
@@ -119,9 +123,12 @@ function OrdersManagement({ onOrderUpdate }) {
         // Nếu lỗi 404 (Not Found), coi như đã xóa thành công
         if (error.message && (error.message.includes('404') || error.message.includes('Not Found') || error.message.includes('not found'))) {
           console.log('Order not found (404), treating as successful deletion');
-          await fetchOrders();
+          // Cập nhật state ngay lập tức - xóa đơn hàng khỏi danh sách
+          setOrders(prevOrders => prevOrders.filter(order => order.id !== orderIdToDelete));
           setSelectedOrder(null);
           showNotification('Đơn hàng đã được xóa', 'success');
+          // Sau đó fetch lại để đồng bộ với server
+          await fetchOrders();
           if (onOrderUpdate) {
             onOrderUpdate();
           }
@@ -182,9 +189,11 @@ function OrdersManagement({ onOrderUpdate }) {
 
   const handleBulkDelete = () => {
     if (selectedOrders.size === 0) return;
+    const orderIdsToDelete = Array.from(selectedOrders);
+    const deletedCount = orderIdsToDelete.length;
     setPendingAction(() => async () => {
       try {
-        const deletePromises = Array.from(selectedOrders).map(async (id) => {
+        const deletePromises = orderIdsToDelete.map(async (id) => {
           try {
             return await ordersAPI.delete(id);
           } catch (error) {
@@ -198,13 +207,16 @@ function OrdersManagement({ onOrderUpdate }) {
           }
         });
         await Promise.all(deletePromises);
-        await fetchOrders();
+        // Cập nhật state ngay lập tức - xóa các đơn hàng khỏi danh sách
+        setOrders(prevOrders => prevOrders.filter(order => !orderIdsToDelete.includes(order.id)));
         setSelectedOrders(new Set());
         setShowBulkActions(false);
-        if (selectedOrder && selectedOrders.has(selectedOrder.id)) {
+        if (selectedOrder && orderIdsToDelete.includes(selectedOrder.id)) {
           setSelectedOrder(null);
         }
-        showNotification(`Đã xóa ${selectedOrders.size} đơn hàng thành công`, 'success');
+        showNotification(`Đã xóa ${deletedCount} đơn hàng thành công`, 'success');
+        // Sau đó fetch lại để đồng bộ với server
+        await fetchOrders();
         if (onOrderUpdate) {
           onOrderUpdate();
         }
@@ -214,14 +226,16 @@ function OrdersManagement({ onOrderUpdate }) {
         if (!error.message || (!error.message.includes('404') && !error.message.includes('Not Found') && !error.message.includes('not found'))) {
           showNotification('Có lỗi xảy ra khi xóa đơn hàng', 'error');
         } else {
-          // Nếu chỉ có lỗi 404, coi như thành công
-          await fetchOrders();
+          // Nếu chỉ có lỗi 404, coi như thành công và cập nhật state
+          setOrders(prevOrders => prevOrders.filter(order => !orderIdsToDelete.includes(order.id)));
           setSelectedOrders(new Set());
           setShowBulkActions(false);
-          if (selectedOrder && selectedOrders.has(selectedOrder.id)) {
+          if (selectedOrder && orderIdsToDelete.includes(selectedOrder.id)) {
             setSelectedOrder(null);
           }
-          showNotification(`Đã xóa ${selectedOrders.size} đơn hàng thành công`, 'success');
+          showNotification(`Đã xóa ${deletedCount} đơn hàng thành công`, 'success');
+          // Sau đó fetch lại để đồng bộ với server
+          await fetchOrders();
           if (onOrderUpdate) {
             onOrderUpdate();
           }
