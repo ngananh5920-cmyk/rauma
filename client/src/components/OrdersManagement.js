@@ -409,27 +409,6 @@ function OrdersManagement({ onOrderUpdate }) {
                     )}
                   </div>
                 </div>
-
-                <div className="detail-section order-actions-section">
-                  <h4>Thao tác với đơn hàng</h4>
-                  <div className="order-action-buttons">
-                    <button
-                      className="btn-edit"
-                      onClick={() => {
-                        setPendingAction(() => handleEditOrder);
-                        setShowPasswordModal(true);
-                      }}
-                    >
-                      Sửa đơn hàng
-                    </button>
-                    <button
-                      className="btn-delete"
-                      onClick={handleDeleteOrder}
-                    >
-                      Xóa đơn hàng
-                    </button>
-                  </div>
-                </div>
               </>
             ) : (
               <div className="detail-section">
